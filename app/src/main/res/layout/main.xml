@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:orientation="horizontal"
+            android:padding="15dp"
+            android:gravity="center|center_horizontal">
+
+            <Switch
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Enable activity tracking"
+                android:textAppearance="@style/txt_h3"
+                android:id="@+id/activity_service_switch"
+                android:layout_weight="1"
+                android:checked="true" />
+
+
+        </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp">
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/connect_to_helmet_button"
+        android:layout_gravity="center_horizontal"
+        android:text="Connect to helmet"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/connect_to_bike_button"
+        android:layout_gravity="center_horizontal"
+        android:text="Connect to bike"
+        android:clickable="false"
+        android:enabled="false"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp">
+
+        <ImageView
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:id="@+id/connected_to_helemet_img"
+            android:layout_marginRight="40dp"
+            android:src="@drawable/bike_helmet_bw"/>
+        <ImageView
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:id="@+id/connected_to_bike_img"
+            android:src="@drawable/bike_check_bw"/>
+
+    </LinearLayout>
+
+
+</LinearLayout>

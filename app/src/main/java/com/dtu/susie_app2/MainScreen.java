@@ -70,9 +70,9 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
     private static final int UART_PROFILE_DISCONNECTED = 21;
     private static final int STATE_OFF = 10;
 
-    private int mState = UART_PROFILE_DISCONNECTED;
-    private UartService mService = null;
-    private BluetoothDevice mDevice = null;
+    private int mHelmetState, mBikeState = UART_PROFILE_DISCONNECTED;
+    private UartService mUARTServiceHelmet, mUARTServiceBike = null;
+    private BluetoothDevice mHelmetDevice, mBikeDevice = null;
     private BluetoothAdapter mBtAdapter = null;
 
     private Button connect_helmet_b, connect_bike_b;
@@ -162,8 +162,8 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
                         startActivityForResult(newIntent, REQUEST_SELECT_DEVICE);
                     } else {
                         //Disconnect button pressed
-                        if (mDevice != null) {
-                            mService.disconnect();
+                        if (mHelmetDevice != null) {
+                            mUARTServiceHelmet.disconnect();
                             MyApplication.helmetConnect =false;
                             updateConnImages();
 
@@ -191,8 +191,8 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
                         startActivityForResult(newIntent, REQUEST_SELECT_DEVICE);
                     } else {
                         //Disconnect button pressed
-                        if (mDevice != null) {
-                            mService.disconnect();
+                        if (mBikeDevice != null) {
+                            mUARTServiceBike.disconnect();
 
                         }
                     }
@@ -272,12 +272,13 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
         return batteryPct * 100;
     }
 
+
     //UART service connected/disconnected
-    private ServiceConnection mServiceConnection = new ServiceConnection() {
+    private ServiceConnection mHelmetServiceConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder rawBinder) {
-            mService = ((UartService.LocalBinder) rawBinder).getService();
-            Log.d(TAG, "onServiceConnected mService= " + mService);
-            if (!mService.initialize()) {
+            mUARTServiceHelmet = ((UartService.LocalBinder) rawBinder).getService();
+            Log.d(TAG, "onServiceConnected mUARTServiceHelmet= " + mUARTServiceHelmet);
+            if (!mUARTServiceHelmet.initialize()) {
                 Log.e(TAG, "Unable to initialize Bluetooth");
                 finish();
             }
@@ -285,8 +286,26 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
         }
 
         public void onServiceDisconnected(ComponentName classname) {
-            ////     mService.disconnect(mDevice);
-            mService = null;
+            ////     mUARTServiceHelmet.disconnect(mHelmetDevice);
+            mUARTServiceHelmet = null;
+        }
+    };
+
+    //UART service connected/disconnected
+    private ServiceConnection mBikeServiceConnection = new ServiceConnection() {
+        public void onServiceConnected(ComponentName className, IBinder rawBinder) {
+            mUARTServiceBike = ((UartService.LocalBinder) rawBinder).getService();
+            Log.d(TAG, "onServiceConnected mUARTServiceBike= " + mUARTServiceBike);
+            if (!mUARTServiceBike.initialize()) {
+                Log.e(TAG, "Unable to initialize Bluetooth");
+                finish();
+            }
+
+        }
+
+        public void onServiceDisconnected(ComponentName classname) {
+            ////     mUARTServiceHelmet.disconnect(mHelmetDevice);
+            mUARTServiceBike = null;
         }
     };
 
@@ -311,14 +330,29 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
                     public void run() {
                         String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
                         Log.d(TAG, "UART_CONNECT_MSG");
-                        connect_helmet_b.setText("Disconnect");
-                        //edtMessage.setEnabled(true);
-                        //btnSend.setEnabled(true);
-                        //((TextView) findViewById(R.id.deviceName)).setText(mDevice.getName()+ " - ready");
-                        listAdapter.add("[" + currentDateTimeString + "] Connected to: " + mDevice.getName());
-                        messageListView.smoothScrollToPosition(listAdapter.getCount() - 1);
-                        mState = UART_PROFILE_CONNECTED;
-                        MyApplication.helmetConnect =true;
+
+                        if (MyApplication.helmetConnect) {
+
+                            connect_helmet_b.setText("Disconnect");
+                            //edtMessage.setEnabled(true);
+                            //btnSend.setEnabled(true);
+                            //((TextView) findViewById(R.id.deviceName)).setText(mHelmetDevice.getName()+ " - ready");
+                            listAdapter.add("[" + currentDateTimeString + "] Connected to: " + mHelmetDevice.getName());
+                            messageListView.smoothScrollToPosition(listAdapter.getCount() - 1);
+                            mHelmetState = UART_PROFILE_CONNECTED;
+
+                        }
+                        else if (MyApplication.bikeConnect){
+
+                            connect_bike_b.setText("Disconnect");
+                            //edtMessage.setEnabled(true);
+                            //btnSend.setEnabled(true);
+                            //((TextView) findViewById(R.id.deviceName)).setText(mHelmetDevice.getName()+ " - ready");
+                            listAdapter.add("[" + currentDateTimeString + "] Connected to: " + mBikeDevice.getName());
+                            messageListView.smoothScrollToPosition(listAdapter.getCount() - 1);
+                            mBikeState = UART_PROFILE_CONNECTED;
+                        }
+
                         updateConnImages();
                     }
                 });
@@ -330,15 +364,15 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
                     public void run() {
                         String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
                         Log.d(TAG, "UART_DISCONNECT_MSG");
+
                         connect_helmet_b.setText("Connect");
                         //edtMessage.setEnabled(false);
                         //btnSend.setEnabled(false);
                         //((TextView) findViewById(R.id.deviceName)).setText("Not Connected");
-                        listAdapter.add("[" + currentDateTimeString + "] Disconnected to: " + mDevice.getName());
-                        mState = UART_PROFILE_DISCONNECTED;
-                        mService.close();
+                        listAdapter.add("[" + currentDateTimeString + "] Disconnected to: " + mHelmetDevice.getName());
+                        mHelmetState = UART_PROFILE_DISCONNECTED;
+                        mUARTServiceHelmet.close();
                         //setUiState();
-                        MyApplication.helmetConnect=false;
                         updateConnImages();
                     }
                 });
@@ -347,7 +381,7 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
 
             //*********************//
             if (action.equals(UartService.ACTION_GATT_SERVICES_DISCOVERED)) {
-                mService.enableTXNotification();
+                mUARTServiceHelmet.enableTXNotification();
             }
             //*********************//
             /**if (action.equals(UartService.ACTION_DATA_AVAILABLE)) {
@@ -415,18 +449,24 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
             //*********************//
             if (action.equals(UartService.DEVICE_DOES_NOT_SUPPORT_UART)) {
                 showMessage("Device doesn't support UART. Disconnecting");
-                mService.disconnect();
+                mUARTServiceHelmet.disconnect();
             }
 
 
         }
     };
 
+
+
     private void service_init() {
-        Intent bindIntent = new Intent(this, UartService.class);
-        bindService(bindIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
+        Intent bindIntentHelmet = new Intent(this, UartService.class);
+        bindService(bindIntentHelmet, mHelmetServiceConnection, Context.BIND_AUTO_CREATE);
+
+        Intent bindIntentBike = new Intent(this, UartService.class);
+        bindService(bindIntentBike, mBikeServiceConnection, Context.BIND_AUTO_CREATE);
 
         LocalBroadcastManager.getInstance(this).registerReceiver(UARTStatusChangeReceiver, makeGattUpdateIntentFilter());
+
     }
 
     private static IntentFilter makeGattUpdateIntentFilter() {
@@ -471,9 +511,13 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
         } catch (Exception ignore) {
             Log.e(TAG, ignore.toString());
         }
-        unbindService(mServiceConnection);
-        mService.stopSelf();
-        mService = null;
+        unbindService(mHelmetServiceConnection);
+        mUARTServiceHelmet.stopSelf();
+        mUARTServiceHelmet = null;
+
+        unbindService(mBikeServiceConnection);
+        mUARTServiceBike.stopSelf();
+        mUARTServiceBike = null;
 
     }
 
@@ -538,19 +582,44 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
                 //When the DeviceListActivity return, with the selected device address
                 if (resultCode == Activity.RESULT_OK && data != null) {
                     String deviceAddress = data.getStringExtra(BluetoothDevice.EXTRA_DEVICE);
-                    mDevice = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(deviceAddress);
 
-                    Log.d(TAG, "... onActivityResultdevice.address==" + mDevice + "mserviceValue" + mService);
-                    //((TextView) findViewById(R.id.deviceName)).setText(mDevice.getName()+ " - connecting");
-                    mService.connect(deviceAddress);
+                    BluetoothDevice temp_device;
+
+                    temp_device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(deviceAddress);
+
+                    if (temp_device.getName().equals("Helmet")){
+                        mHelmetDevice = temp_device;
+
+                        MyApplication.helmetConnect = true;
+
+                        Log.d(TAG, "... onActivityResultdevice.address==" + mHelmetDevice + "mserviceValue" + mUARTServiceHelmet);
+                        //((TextView) findViewById(R.id.deviceName)).setText(mHelmetDevice.getName()+ " - connecting");
+                        mUARTServiceHelmet.connect(deviceAddress);
 
 
-                    // Store address of device
+                        // Store address of device
 
-                    SharedPreferences prefs = getSharedPreferences("com.dtu.susie_bike_app", Context.MODE_PRIVATE);
-                    MyApplication.helmetAddress = deviceAddress;
-                    prefs.edit().putString(MyApplication.prefsHelmetAddress,MyApplication.helmetAddress).commit();
+                        SharedPreferences prefs = getSharedPreferences("com.dtu.susie_bike_app", Context.MODE_PRIVATE);
+                        MyApplication.helmetAddress = deviceAddress;
+                        prefs.edit().putString(MyApplication.prefsHelmetAddress,MyApplication.helmetAddress).commit();
 
+                    }
+                    else if (temp_device.getName().equals("Bike")){
+                        mBikeDevice = temp_device;
+
+                        MyApplication.bikeConnect = true;
+
+                        Log.d(TAG, "... onActivityResultdevice.address==" + mBikeDevice + "mserviceValue" + mUARTServiceBike);
+                        //((TextView) findViewById(R.id.deviceName)).setText(mHelmetDevice.getName()+ " - connecting");
+                        mUARTServiceBike.connect(deviceAddress);
+
+
+                        // Store address of device
+
+                        SharedPreferences prefs = getSharedPreferences("com.dtu.susie_bike_app", Context.MODE_PRIVATE);
+                        MyApplication.bikeAddress = deviceAddress;
+                        prefs.edit().putString(MyApplication.prefsBikeAddress,MyApplication.bikeAddress).commit();
+                    }
 
                 }
                 break;
@@ -580,7 +649,7 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
 
     @Override
     public void onBackPressed() {
-        if (mState == UART_PROFILE_CONNECTED) {
+        if (mHelmetState == UART_PROFILE_CONNECTED || mBikeState == UART_PROFILE_CONNECTED) {
             Intent startMain = new Intent(Intent.ACTION_MAIN);
             startMain.addCategory(Intent.CATEGORY_HOME);
             startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

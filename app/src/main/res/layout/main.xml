@@ -42,9 +42,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/connect_to_bike_button"
         android:layout_gravity="center_horizontal"
-        android:text="Connect"
-        android:clickable="false"
-        android:enabled="false"/>
+        android:text="Connect" />
 
     </LinearLayout>
 

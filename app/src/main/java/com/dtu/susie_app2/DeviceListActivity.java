@@ -181,9 +181,9 @@ public class DeviceListActivity extends Activity {
                                 @Override
                                 public void run() {
                                     // TEST!! Only scan for "Helmet devices
-                                    if (device.getName().equals("Helmet")) {
+                                    //if (device.getName().equals("Helmet")) {
                                         addDevice(device, rssi);
-                                    }
+                                    //}
                                 }
                             });
 

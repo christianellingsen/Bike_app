@@ -35,14 +35,14 @@
         android:layout_height="wrap_content"
         android:id="@+id/connect_to_helmet_button"
         android:layout_gravity="center_horizontal"
-        android:text="Connect to helmet"/>
+        android:text="Connect"/>
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/connect_to_bike_button"
         android:layout_gravity="center_horizontal"
-        android:text="Connect to bike"
+        android:text="Connect"
         android:clickable="false"
         android:enabled="false"/>
 
@@ -68,6 +68,13 @@
             android:src="@drawable/bike_check_bw"/>
 
     </LinearLayout>
+
+    <ListView
+        android:id="@+id/main_debug_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+    </ListView>
 
 
 </LinearLayout>

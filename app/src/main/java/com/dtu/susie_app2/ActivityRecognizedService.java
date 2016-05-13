@@ -40,12 +40,15 @@ public class ActivityRecognizedService extends IntentService {
                     break;
                 }
                 case DetectedActivity.ON_BICYCLE: {
-                    Log.e( "ActivityRecogition", "On Bicycle: " + activity.getConfidence() );
-                    NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
-                    builder.setContentText( "Are you bicycling?" );
-                    builder.setSmallIcon( R.mipmap.ic_launcher );
-                    builder.setContentTitle( getString( R.string.app_name ) );
-                    NotificationManagerCompat.from(this).notify(0, builder.build());
+                    if( activity.getConfidence() >= 75 ) {
+                        Log.e( "ActivityRecogition", "On Bicycle: " + activity.getConfidence() );
+                        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+                        builder.setContentText( "Are you bicycling?" );
+                        builder.setSmallIcon( R.mipmap.ic_launcher );
+                        builder.setContentTitle( getString( R.string.app_name ) );
+                        NotificationManagerCompat.from(this).notify(0, builder.build());
+                    }
+
 
                     // TODO
                     // Start bluetooth service
@@ -59,7 +62,7 @@ public class ActivityRecognizedService extends IntentService {
                     break;
                 }
                 case DetectedActivity.RUNNING: {
-                    Log.e( "ActivityRecogition", "Running: " + activity.getConfidence() );
+                    Log.e("ActivityRecogition", "Running: " + activity.getConfidence() );
                     break;
                 }
                 case DetectedActivity.STILL: {

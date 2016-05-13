@@ -30,8 +30,10 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.Toast;
 
@@ -50,8 +52,11 @@ import org.apache.http.message.BasicNameValuePair;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -74,6 +79,9 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
     private ImageView helmetImage,bikeImage;
     private Switch activitySerivceSwitch;
 
+    private ListView messageListView;
+    private ArrayAdapter<String> listAdapter;
+
     String link = MyApplication.TS_ADDRESS;
     HttpClient httpClient = new DefaultHttpClient();
     HttpPost httpPost = new HttpPost(link);
@@ -94,6 +102,11 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
 
         helmetImage = (ImageView) findViewById(R.id.connected_to_helemet_img);
         bikeImage = (ImageView) findViewById(R.id.connected_to_bike_img);
+        messageListView = (ListView) findViewById(R.id.main_debug_list);
+
+        listAdapter = new ArrayAdapter<String>(this, R.layout.message_detail);
+        messageListView.setAdapter(listAdapter);
+        messageListView.setDivider(null);
 
         mApiClient = new GoogleApiClient.Builder(this)
                 .addApi(ActivityRecognition.API)
@@ -141,7 +154,7 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
                     Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                     startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
                 } else {
-                    if (connect_helmet_b.getText().equals("Connect to helmet")) {
+                    if (connect_helmet_b.getText().equals("Connect")) {
 
                         //Connect button pressed, open DeviceListActivity class, with popup windows that scan for devices
 
@@ -170,7 +183,7 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
                     Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                     startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
                 } else {
-                    if (connect_bike_b.getText().equals("Connect to bike")) {
+                    if (connect_bike_b.getText().equals("Connect")) {
 
                         //Connect button pressed, open DeviceListActivity class, with popup windows that scan for devices
 
@@ -302,10 +315,11 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
                         //edtMessage.setEnabled(true);
                         //btnSend.setEnabled(true);
                         //((TextView) findViewById(R.id.deviceName)).setText(mDevice.getName()+ " - ready");
-                        //listAdapter.add("[" + currentDateTimeString + "] Connected to: " + mDevice.getName());
-                        //messageListView.smoothScrollToPosition(listAdapter.getCount() - 1);
+                        listAdapter.add("[" + currentDateTimeString + "] Connected to: " + mDevice.getName());
+                        messageListView.smoothScrollToPosition(listAdapter.getCount() - 1);
                         mState = UART_PROFILE_CONNECTED;
-
+                        MyApplication.helmetConnect =true;
+                        updateConnImages();
                     }
                 });
             }
@@ -320,11 +334,12 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
                         //edtMessage.setEnabled(false);
                         //btnSend.setEnabled(false);
                         //((TextView) findViewById(R.id.deviceName)).setText("Not Connected");
-                        //listAdapter.add("[" + currentDateTimeString + "] Disconnected to: " + mDevice.getName());
+                        listAdapter.add("[" + currentDateTimeString + "] Disconnected to: " + mDevice.getName());
                         mState = UART_PROFILE_DISCONNECTED;
                         mService.close();
                         //setUiState();
-
+                        MyApplication.helmetConnect=false;
+                        updateConnImages();
                     }
                 });
             }
@@ -356,15 +371,38 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
             if (action.equals(UartService.ACTION_DATA_AVAILABLE)) {
 
                 final byte[] txValue = intent.getByteArrayExtra(UartService.EXTRA_DATA);
+                final byte [] valueByte = Arrays.copyOfRange(txValue, 1, txValue.length);
+
+                final String text = new String(new byte[] { txValue[0] });
+
+                //Log.d("Speed debug","Recieved: "+ txValue.length);
+                //Log.d("Speed debug","Recieved: "+  Arrays.toString(txValue));
+
                 runOnUiThread(new Runnable() {
                     public void run() {
                         try {
-                            String text = new String(txValue, "UTF-8");
                             String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
+                            if (text.equals("S")) {
+                                double speed = ByteBuffer.wrap(valueByte).order(ByteOrder.LITTLE_ENDIAN).getDouble();
+                                //System.out.print("Text recieved: " + text + " : " + speed);
+                                listAdapter.add("[" + currentDateTimeString + "] RX: " + text + " : " + speed);
+                                messageListView.smoothScrollToPosition(listAdapter.getCount() - 1);
+                            } else if (text.equals("H")) {
+                                //int orientation = ByteBuffer.wrap(valueByte).order(ByteOrder.LITTLE_ENDIAN).getInt();
+                                String text = new String(valueByte, "UTF-8");
+                                //System.out.print("Text recieved: " + text + " : " + orientation);
+                                checkHelmet(text);
+                                listAdapter.add("[" + currentDateTimeString + "] RX: " + text );
+                                messageListView.smoothScrollToPosition(listAdapter.getCount() - 1);
+                            }
+
+
+                            //String text = new String(txValue, "UTF-8");
+                            //String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
                             //uploadValueToTS(text);
                             //Log.d(TAG, "Text recieved: " + text);
-                            checkHelmet(text);
-                            //System.out.print("Text recieved: "+ text);
+                            //checkHelmet(text);
+                            //System.out.print("Text recieved: "+ text + " : "+ speed);
                             //listAdapter.add("[" + currentDateTimeString + "] RX: " + text);
                             //messageListView.smoothScrollToPosition(listAdapter.getCount() - 1);
 

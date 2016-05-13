@@ -94,12 +94,12 @@ public class UartService extends Service {
                 // Attempts to discover services after successful connection.
                 Log.i(TAG, "Attempting to start service discovery:" +
                         mBluetoothGatt.discoverServices());
-                MyApplication.helmetConnect =true;
+
 
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 intentAction = ACTION_GATT_DISCONNECTED;
                 mConnectionState = STATE_DISCONNECTED;
-                MyApplication.helmetConnect=false;
+
                 Log.i(TAG, "Disconnected from GATT server.");
                 broadcastUpdate(intentAction);
             }

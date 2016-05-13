@@ -181,9 +181,9 @@ public class DeviceListActivity extends Activity {
                                 @Override
                                 public void run() {
                                     // TEST!! Only scan for "Helmet devices
-                                    if (device.getName().equals("Helmet") || device.getName().equals("Bike")) {
-                                        addDevice(device, rssi);
-                                    }
+                                    //if (device.getName().equals("Helmet")) {
+                                    addDevice(device, rssi);
+                                    //}
                                 }
                             });
 
@@ -246,8 +246,15 @@ public class DeviceListActivity extends Activity {
             BluetoothDevice device = deviceList.get(position);
             mBluetoothAdapter.stopLeScan(mLeScanCallback);
 
-            Log.d(TAG, "Adress: " + deviceList.get(position).getAddress());
-            MyApplication.helmet_BT_device = deviceList.get(position);
+            //Log.d(TAG, "Address: " + deviceList.get(position).getAddress());
+
+            if (device.getName().equals("Helmet")){
+                MyApplication.helmet_BT_device = deviceList.get(position);
+            }
+            else if (device.getName().equals("Bike")){
+                MyApplication.bike_BT_device = deviceList.get(position);
+            }
+
 
             Bundle b = new Bundle();
             b.putString(BluetoothDevice.EXTRA_DEVICE, deviceList.get(position).getAddress());

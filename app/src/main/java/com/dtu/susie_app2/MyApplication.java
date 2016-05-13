@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+//import com.firebase.client.Firebase;
+
 /**
  * Created by ce on 31-03-2016.
  */
@@ -19,8 +21,11 @@ public class MyApplication extends android.app.Application {
     // Google maps api
     public static String GOOGLE_MAPS_API_KEY = "AIzaSyAADiWBqxg9VRH_wueHUcs-EIQp4Oc6-rU";
 
-    // Bluetooth
+    // Firebase
+    public static final String firebase_URL = "https://vivid-heat-9811.firebaseio.com/Bike_App_v1";
+    public static String newBikeRideKey = "";
 
+    // Bluetooth
     public static String helmetAddress = "";
     public static String bikeAddress = "";
     public static boolean activityServiceON = true;
@@ -30,6 +35,9 @@ public class MyApplication extends android.app.Application {
     public static BluetoothDevice helmet_BT_device;
     public static BluetoothDevice bike_BT_device;
 
+    // Bike ride object
+
+    public static BikeRide bikeRide;
 
     //Strings
 
@@ -39,16 +47,12 @@ public class MyApplication extends android.app.Application {
     public static String prefsHelmetConnected = "helmetConn";
     public static String prefsBikeConnected = "bikeConn";
 
-    //TODO
-    // Get address from shared prefs
-    // Setup helmet and bike. Scan and connect. Store addresses.
-    // On bike activity detected scan for bike and helmet, and start log/notify helmet missing etc.
-
-
 
     @Override
     public void onCreate() {
         super.onCreate();
+
+        //Firebase.setAndroidContext(this);
 
         SharedPreferences prefs = getSharedPreferences("com.dtu.susie_bike_app", Context.MODE_PRIVATE);
 
@@ -59,6 +63,7 @@ public class MyApplication extends android.app.Application {
         bikeConnect = prefs.getBoolean(prefsBikeConnected,false);
 
         Log.d("Stored device", "Helmet address: "+helmetAddress);
+        Log.d("Stored device", "Bike address: "+bikeAddress);
 
 
     }

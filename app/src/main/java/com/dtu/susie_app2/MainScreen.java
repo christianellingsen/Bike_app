@@ -37,6 +37,7 @@ import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.Toast;
 
+//import com.firebase.client.Firebase;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.ActivityRecognition;
@@ -91,10 +92,21 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
      */
     private GoogleApiClient mApiClient;
 
+
+    // TEST STUFF:
+
+    Button test_b;
+    BluetoothService customBTService = new BluetoothService();
+    //Firebase ref = new Firebase(MyApplication.firebase_URL);
+    //Firebase bikeRideRef = ref.child("bikeRides");
+    //Firebase newBikeRideRef;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+
+        test_b = (Button) findViewById(R.id.test_b);
 
         activitySerivceSwitch = (Switch) findViewById(R.id.activity_service_switch);
         connect_helmet_b = (Button) findViewById(R.id.connect_to_helmet_button);
@@ -127,7 +139,27 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
             return;
         }
 
-        service_init();
+        //service_init();
+
+        test_b.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i(TAG, "onClick- Test.");
+                if (test_b.getText().equals("Start")){
+                    //newBikeRideRef = bikeRideRef.push();
+                    MyApplication.bikeRide = new BikeRide();
+                    //MyApplication.newBikeRideKey = newBikeRideRef.getKey();
+                    startService(new Intent(getBaseContext(), BluetoothService.class));
+                    test_b.setText("Stop");
+                }
+                else if (test_b.getText().equals("Stop")) {
+                    stopService(new Intent(getBaseContext(), BluetoothService.class));
+                    test_b.setText("Start");
+                    MyApplication.bikeRide.setEndTime(System.currentTimeMillis());
+                    //newBikeRideRef.setValue(MyApplication.bikeRide);
+                }
+            }
+        });
 
         activitySerivceSwitch.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -170,6 +202,7 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
                         }
                     }
                 }
+                updateConnImages();
             }
         });
 
@@ -184,7 +217,6 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
                     startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
                 } else {
                     if (connect_bike_b.getText().equals("Connect")) {
-
                         //Connect button pressed, open DeviceListActivity class, with popup windows that scan for devices
 
                         Intent newIntent = new Intent(MainScreen.this, DeviceListActivity.class);
@@ -193,10 +225,12 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
                         //Disconnect button pressed
                         if (mBikeDevice != null) {
                             mUARTServiceBike.disconnect();
+                            MyApplication.bikeConnect =false;
 
                         }
                     }
                 }
+                updateConnImages();
             }
         });
 
@@ -365,14 +399,29 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
                         String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
                         Log.d(TAG, "UART_DISCONNECT_MSG");
 
-                        connect_helmet_b.setText("Connect");
-                        //edtMessage.setEnabled(false);
-                        //btnSend.setEnabled(false);
-                        //((TextView) findViewById(R.id.deviceName)).setText("Not Connected");
-                        listAdapter.add("[" + currentDateTimeString + "] Disconnected to: " + mHelmetDevice.getName());
-                        mHelmetState = UART_PROFILE_DISCONNECTED;
-                        mUARTServiceHelmet.close();
-                        //setUiState();
+                        if(!MyApplication.helmetConnect && mHelmetDevice!=null) {
+
+                            connect_helmet_b.setText("Connect");
+                            //edtMessage.setEnabled(false);
+                            //btnSend.setEnabled(false);
+                            //((TextView) findViewById(R.id.deviceName)).setText("Not Connected");
+                            listAdapter.add("[" + currentDateTimeString + "] Disconnected to: " + mHelmetDevice.getName());
+                            mHelmetState = UART_PROFILE_DISCONNECTED;
+                            mUARTServiceHelmet.close();
+                            //setUiState();
+                        }
+
+                        else if(!MyApplication.bikeConnect && mBikeDevice!=null) {
+
+                            connect_bike_b.setText("Connect");
+                            //edtMessage.setEnabled(false);
+                            //btnSend.setEnabled(false);
+                            //((TextView) findViewById(R.id.deviceName)).setText("Not Connected");
+                            listAdapter.add("[" + currentDateTimeString + "] Disconnected to: " + mBikeDevice.getName());
+                            mBikeState = UART_PROFILE_DISCONNECTED;
+                            mUARTServiceBike.close();
+                            //setUiState();
+                        }
                         updateConnImages();
                     }
                 });
@@ -411,6 +460,8 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
 
                 //Log.d("Speed debug","Recieved: "+ txValue.length);
                 //Log.d("Speed debug","Recieved: "+  Arrays.toString(txValue));
+
+                Log.d(TAG,"UART data available");
 
                 runOnUiThread(new Runnable() {
                     public void run() {

@@ -37,7 +37,7 @@ import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.Toast;
 
-//import com.firebase.client.Firebase;
+import com.firebase.client.Firebase;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.ActivityRecognition;
@@ -56,6 +56,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -66,13 +67,13 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
     private static final int REQUEST_SELECT_DEVICE = 1;
     private static final int REQUEST_ENABLE_BT = 2;
     private static final int UART_PROFILE_READY = 10;
-    public static final String TAG = "nRFUART";
+    public static final String TAG = "MainScreen";
     private static final int UART_PROFILE_CONNECTED = 20;
     private static final int UART_PROFILE_DISCONNECTED = 21;
     private static final int STATE_OFF = 10;
 
     private int mHelmetState, mBikeState = UART_PROFILE_DISCONNECTED;
-    private UartService mUARTServiceHelmet, mUARTServiceBike = null;
+    //private UartService mUARTServiceHelmet, mUARTServiceBike = null;
     private BluetoothDevice mHelmetDevice, mBikeDevice = null;
     private BluetoothAdapter mBtAdapter = null;
 
@@ -92,14 +93,13 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
      */
     private GoogleApiClient mApiClient;
 
-
     // TEST STUFF:
 
     Button test_b;
     BluetoothService customBTService = new BluetoothService();
-    //Firebase ref = new Firebase(MyApplication.firebase_URL);
-    //Firebase bikeRideRef = ref.child("bikeRides");
-    //Firebase newBikeRideRef;
+    Firebase ref = new Firebase(MyApplication.firebase_URL);
+    Firebase bikeRideRef = ref.child("bikeRides");
+    Firebase newBikeRideRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,6 +109,7 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
         test_b = (Button) findViewById(R.id.test_b);
 
         activitySerivceSwitch = (Switch) findViewById(R.id.activity_service_switch);
+
         connect_helmet_b = (Button) findViewById(R.id.connect_to_helmet_button);
         connect_bike_b = (Button) findViewById(R.id.connect_to_bike_button);
 
@@ -119,6 +120,9 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
         listAdapter = new ArrayAdapter<String>(this, R.layout.message_detail);
         messageListView.setAdapter(listAdapter);
         messageListView.setDivider(null);
+
+
+        updateConnImages();
 
         mApiClient = new GoogleApiClient.Builder(this)
                 .addApi(ActivityRecognition.API)
@@ -146,17 +150,19 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
             public void onClick(View v) {
                 Log.i(TAG, "onClick- Test.");
                 if (test_b.getText().equals("Start")){
-                    //newBikeRideRef = bikeRideRef.push();
+                    MyApplication.ridingBike = true;
+                    newBikeRideRef = bikeRideRef.push();
                     MyApplication.bikeRide = new BikeRide();
-                    //MyApplication.newBikeRideKey = newBikeRideRef.getKey();
+                    MyApplication.newBikeRideKey = newBikeRideRef.getKey();
                     startService(new Intent(getBaseContext(), BluetoothService.class));
                     test_b.setText("Stop");
                 }
                 else if (test_b.getText().equals("Stop")) {
+                    MyApplication.ridingBike = false;
                     stopService(new Intent(getBaseContext(), BluetoothService.class));
                     test_b.setText("Start");
                     MyApplication.bikeRide.setEndTime(System.currentTimeMillis());
-                    //newBikeRideRef.setValue(MyApplication.bikeRide);
+                    newBikeRideRef.setValue(MyApplication.bikeRide);
                 }
             }
         });
@@ -195,9 +201,9 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
                     } else {
                         //Disconnect button pressed
                         if (mHelmetDevice != null) {
-                            mUARTServiceHelmet.disconnect();
-                            MyApplication.helmetConnect =false;
-                            updateConnImages();
+                            //mUARTServiceHelmet.disconnect();
+                            //MyApplication.helmetConnect =false;
+
 
                         }
                     }
@@ -224,8 +230,8 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
                     } else {
                         //Disconnect button pressed
                         if (mBikeDevice != null) {
-                            mUARTServiceBike.disconnect();
-                            MyApplication.bikeConnect =false;
+                            //mUARTServiceBike.disconnect();
+                            //MyApplication.bikeConnect =false;
 
                         }
                     }
@@ -236,7 +242,8 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
 
     }
 
-
+    // Moved to BluetoothService
+    /**
     private void uploadValueToTS(String gyro) {
         final int batt = (int) getBatteryCapacity();
         //final int v = value;
@@ -245,11 +252,7 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
         new AsyncTask() {
             @Override
             protected Object doInBackground(Object... executeParametre) {
-                /**StringBuilder sb = new StringBuilder();
-                 sb.append("");
-                 sb.append(v);
-                 String strI = sb.toString();
-                 **/
+
 
                 StringBuilder sb2 = new StringBuilder();
                 sb2.append("");
@@ -294,6 +297,7 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
         }.execute(10);
 
     }
+
 
     public float getBatteryCapacity() {
         IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
@@ -351,14 +355,16 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
 
         }
     };
+    **/
 
+    /**
     private final BroadcastReceiver UARTStatusChangeReceiver = new BroadcastReceiver() {
 
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
 
             final Intent mIntent = intent;
-            //*********************//
+
             if (action.equals(UartService.ACTION_GATT_CONNECTED)) {
                 runOnUiThread(new Runnable() {
                     public void run() {
@@ -392,7 +398,6 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
                 });
             }
 
-            //*********************//
             if (action.equals(UartService.ACTION_GATT_DISCONNECTED)) {
                 runOnUiThread(new Runnable() {
                     public void run() {
@@ -428,29 +433,6 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
             }
 
 
-            //*********************//
-            if (action.equals(UartService.ACTION_GATT_SERVICES_DISCOVERED)) {
-                mUARTServiceHelmet.enableTXNotification();
-            }
-            //*********************//
-            /**if (action.equals(UartService.ACTION_DATA_AVAILABLE)) {
-
-             final byte[] txValue = intent.getByteArrayExtra(UartService.EXTRA_DATA);
-             runOnUiThread(new Runnable() {
-             public void run() {
-             try {
-             String text = new String(txValue, "UTF-8");
-             String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
-             uploadValueToTS(text);
-             listAdapter.add("["+currentDateTimeString+"] RX: "+text);
-             messageListView.smoothScrollToPosition(listAdapter.getCount() - 1);
-
-             } catch (Exception e) {
-             Log.e(TAG, e.toString());
-             }
-             }
-             });
-             }**/
             if (action.equals(UartService.ACTION_DATA_AVAILABLE)) {
 
                 final byte[] txValue = intent.getByteArrayExtra(UartService.EXTRA_DATA);
@@ -497,7 +479,6 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
                     }
                 });
             }
-            //*********************//
             if (action.equals(UartService.DEVICE_DOES_NOT_SUPPORT_UART)) {
                 showMessage("Device doesn't support UART. Disconnecting");
                 mUARTServiceHelmet.disconnect();
@@ -529,27 +510,10 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
         intentFilter.addAction(UartService.DEVICE_DOES_NOT_SUPPORT_UART);
         return intentFilter;
     }
-
+**/
     @Override
     public void onStart() {
         super.onStart();
-        /**
-         // ATTENTION: This was auto-generated to implement the App Indexing API.
-         // See https://g.co/AppIndexing/AndroidStudio for more information.
-         mApiClient.connect();
-         // ATTENTION: This was auto-generated to implement the App Indexing API.
-         // See https://g.co/AppIndexing/AndroidStudio for more information.
-         Action viewAction = Action.newAction(
-         Action.TYPE_VIEW, // TODO: choose an action type.
-         "Main_akt Page", // TODO: Define a title for the content shown.
-         // TODO: If you have web page content that matches this app activity's content,
-         // make sure this auto-generated web page URL is correct.
-         // Otherwise, set the URL to null.
-         Uri.parse("http://host/path"),
-         // TODO: Make sure this auto-generated app deep link URI is correct.
-         Uri.parse("android-app://com.dtu.susie_app2/http/host/path")
-         );AppIndex.AppIndexApi.start(mApiClient, viewAction);
-         **/
     }
 
     @Override
@@ -558,17 +522,21 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
         Log.d(TAG, "onDestroy()");
 
         try {
-            LocalBroadcastManager.getInstance(this).unregisterReceiver(UARTStatusChangeReceiver);
+            /**LocalBroadcastManager.getInstance(this).unregisterReceiver(UARTStatusChangeReceiver);
+
+            unbindService(mHelmetServiceConnection);
+            mUARTServiceHelmet.stopSelf();
+            mUARTServiceHelmet = null;
+
+            unbindService(mBikeServiceConnection);
+            mUARTServiceBike.stopSelf();
+            mUARTServiceBike = null;
+             **/
+
         } catch (Exception ignore) {
             Log.e(TAG, ignore.toString());
         }
-        unbindService(mHelmetServiceConnection);
-        mUARTServiceHelmet.stopSelf();
-        mUARTServiceHelmet = null;
 
-        unbindService(mBikeServiceConnection);
-        mUARTServiceBike.stopSelf();
-        mUARTServiceBike = null;
 
     }
 
@@ -576,24 +544,6 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
     protected void onStop() {
         Log.d(TAG, "onStop");
         super.onStop();
-        /**
-         // ATTENTION: This was auto-generated to implement the App Indexing API.
-         // See https://g.co/AppIndexing/AndroidStudio for more information.
-         Action viewAction = Action.newAction(
-         Action.TYPE_VIEW, // TODO: choose an action type.
-         "Main_akt Page", // TODO: Define a title for the content shown.
-         // TODO: If you have web page content that matches this app activity's content,
-         // make sure this auto-generated web page URL is correct.
-         // Otherwise, set the URL to null.
-         Uri.parse("http://host/path"),
-         // TODO: Make sure this auto-generated app deep link URI is correct.
-         Uri.parse("android-app://com.dtu.susie_app2/http/host/path")
-         );
-         AppIndex.AppIndexApi.end(mApiClient, viewAction);
-         // ATTENTION: This was auto-generated to implement the App Indexing API.
-         // See https://g.co/AppIndexing/AndroidStudio for more information.
-         mApiClient.disconnect();
-         **/
     }
 
     @Override
@@ -641,11 +591,11 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
                     if (temp_device.getName().equals("Helmet")){
                         mHelmetDevice = temp_device;
 
-                        MyApplication.helmetConnect = true;
+                        //MyApplication.helmetConnect = true;
 
-                        Log.d(TAG, "... onActivityResultdevice.address==" + mHelmetDevice + "mserviceValue" + mUARTServiceHelmet);
+                        //Log.d(TAG, "... onActivityResultdevice.address==" + mHelmetDevice + "mserviceValue" + mUARTServiceHelmet);
                         //((TextView) findViewById(R.id.deviceName)).setText(mHelmetDevice.getName()+ " - connecting");
-                        mUARTServiceHelmet.connect(deviceAddress);
+                        //mUARTServiceHelmet.connect(deviceAddress);
 
 
                         // Store address of device
@@ -658,11 +608,11 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
                     else if (temp_device.getName().equals("Bike")){
                         mBikeDevice = temp_device;
 
-                        MyApplication.bikeConnect = true;
+                        //MyApplication.bikeConnect = true;
 
-                        Log.d(TAG, "... onActivityResultdevice.address==" + mBikeDevice + "mserviceValue" + mUARTServiceBike);
+                        //Log.d(TAG, "... onActivityResultdevice.address==" + mBikeDevice + "mserviceValue" + mUARTServiceBike);
                         //((TextView) findViewById(R.id.deviceName)).setText(mHelmetDevice.getName()+ " - connecting");
-                        mUARTServiceBike.connect(deviceAddress);
+                        //mUARTServiceBike.connect(deviceAddress);
 
 
                         // Store address of device
@@ -671,6 +621,8 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
                         MyApplication.bikeAddress = deviceAddress;
                         prefs.edit().putString(MyApplication.prefsBikeAddress,MyApplication.bikeAddress).commit();
                     }
+
+                    updateConnImages();
 
                 }
                 break;
@@ -739,24 +691,41 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
+
+        Log.d(TAG,"onConnected called");
+
         Intent intent = new Intent( this, ActivityRecognizedService.class );
         PendingIntent pendingIntent = PendingIntent.getService( this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT );
         ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates( mApiClient, 5000, pendingIntent );
+
+        // Firebase log
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        String date  = dateFormat.format(new Date());
+
+        Firebase ref = new Firebase(MyApplication.firebase_URL);
+        Firebase logRef = ref.child("log").child("ActivityRecognizeStart");
+        logRef.setValue(date);
     }
 
     @Override
     public void onConnectionSuspended(int i) {
 
+        Log.d(TAG, "onConnectionSuspended");
+
+
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
+        Log.d(TAG,"onConnectionFailed called");
     }
+
+
+
 
     public void updateConnImages(){
 
-        if (MyApplication.helmetConnect){
+        /**if (MyApplication.helmetConnect){
             helmetImage.setImageResource(R.drawable.bike_helmet_check);
         }
         if (!MyApplication.helmetConnect){
@@ -768,6 +737,19 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
         if (!MyApplication.bikeConnect){
             bikeImage.setImageResource(R.drawable.bike_check_bw);
         }
+        **/
+        if (MyApplication.helmetAddress.length()>1){
+            helmetImage.setImageResource(R.drawable.bike_helmet_check);
+        }
+        else{
+            helmetImage.setImageResource(R.drawable.bike_helmet_bw);
+        }
+        if (MyApplication.bikeAddress.length()>1){
+            bikeImage.setImageResource(R.drawable.bike_check);
+        }
+        else {
+            bikeImage.setImageResource(R.drawable.bike_check_bw);
+        }
     }
 
     public void checkApiClientEnabled(){
@@ -777,8 +759,23 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
             Toast.makeText(this, "Activity tracking ON ", Toast.LENGTH_SHORT).show();
         }
         else {
-            mApiClient.disconnect();
-            Toast.makeText(this, "Activity tracking OFF", Toast.LENGTH_SHORT).show();
+
+            if (mApiClient.isConnected()) {
+                Intent intent = new Intent(this, ActivityRecognizedService.class);
+                PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(mApiClient, pendingIntent);
+                mApiClient.disconnect();
+                Toast.makeText(this, "Activity tracking OFF", Toast.LENGTH_SHORT).show();
+
+                // Firebase log
+                SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+                String date  = dateFormat.format(new Date());
+
+                Firebase ref = new Firebase(MyApplication.firebase_URL);
+                Firebase logRef = ref.child("log").child("ActivityRecognizeEnd");
+                logRef.setValue(date);
+
+            }
         }
 
     }

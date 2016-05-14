@@ -10,26 +10,45 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.os.AsyncTask;
+import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-//import com.firebase.client.Firebase;
+import com.firebase.client.Firebase;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * Created by chris on 12-05-2016.
@@ -43,8 +62,8 @@ public class BluetoothService extends Service {
     List<BluetoothDevice> deviceList;
     private ServiceConnection onService = null;
     Map<String, Integer> devRssiValues;
-    private static final long SCAN_PERIOD = 10000; //10 seconds
-    private Handler mHandler;
+    private static final long SCAN_PERIOD = 50000; //5 seconds
+    private Handler mHandler, timerHandler;
     private boolean mScanning;
 
     private static final int UART_PROFILE_CONNECTED = 20;
@@ -56,13 +75,21 @@ public class BluetoothService extends Service {
     private BluetoothDevice mHelmetDevice, mBikeDevice = null;
     private BluetoothAdapter mBtAdapter = null;
 
-    //Firebase ref = new Firebase(MyApplication.firebase_URL);
+    Firebase ref = new Firebase(MyApplication.firebase_URL);
+
+    HttpClient httpClient = new DefaultHttpClient();
+    HttpPost httpPost = new HttpPost(MyApplication.TS_ADDRESS);
+
+    ExecutorService threadPoolExecutor = Executors.newSingleThreadExecutor();
+    Future uploadRunnable;
+
 
     @Override
     public void onCreate() {
         super.onCreate();
 
         mHandler = new Handler();
+        timerHandler = new Handler();
         deviceList = new ArrayList<BluetoothDevice>();
         devRssiValues = new HashMap<String, Integer>();
         Log.d(TAG, "onCreate called");
@@ -86,6 +113,14 @@ public class BluetoothService extends Service {
         mScanning = false;
 
         service_init();
+
+        // Firebase log
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        String date  = dateFormat.format(new Date());
+
+        Firebase ref = new Firebase(MyApplication.firebase_URL);
+        Firebase logRef = ref.child("log").child("BluetoothServiceStart");
+        logRef.setValue(date);
 
     }
 
@@ -132,36 +167,33 @@ public class BluetoothService extends Service {
             final Intent mIntent = intent;
             //*********************//
             if (action.equals(UartService.ACTION_GATT_CONNECTED)) {
-                new Runnable() {
-                    public void run() {
-                        Log.d(TAG, "UART_CONNECT_MSG");
+                Log.d(TAG, "UART_CONNECT_MSG");
 
-                        if (MyApplication.helmetConnect) {
-                            mHelmetState = UART_PROFILE_CONNECTED;
 
-                        }
-                        else if (MyApplication.bikeConnect){
-                            mBikeState = UART_PROFILE_CONNECTED;
-                        }
-                    }
-                };
+                if (MyApplication.helmetConnect) {
+                    mHelmetState = UART_PROFILE_CONNECTED;
+
+                }
+                else if (MyApplication.bikeConnect){
+                    mBikeState = UART_PROFILE_CONNECTED;
+                }
             }
 
             //*********************//
             if (action.equals(UartService.ACTION_GATT_DISCONNECTED)) {
-                new Runnable() {
-                    public void run() {
-                        if(!MyApplication.helmetConnect && mHelmetDevice!=null) {
-                            mHelmetState = UART_PROFILE_DISCONNECTED;
-                            mUARTServiceHelmet.close();
-                        }
+                Log.d(TAG, "UART_DISCONNECT_MSG");
+                MyApplication.bikeRide.setWoreHelmetCorrect(false);
+                if(!MyApplication.helmetConnect && mHelmetDevice!=null) {
+                    mHelmetState = UART_PROFILE_DISCONNECTED;
+                    mUARTServiceHelmet.close();
+                    Log.d(TAG, "UART_DISCONNECT_HELMET");
+                }
 
-                        else if(!MyApplication.bikeConnect && mBikeDevice!=null) {
-                            mBikeState = UART_PROFILE_DISCONNECTED;
-                            mUARTServiceBike.close();
-                        }
-                    }
-                };
+                else if(!MyApplication.bikeConnect && mBikeDevice!=null) {
+                    mBikeState = UART_PROFILE_DISCONNECTED;
+                    mUARTServiceBike.close();
+                }
+
             }
 
 
@@ -178,35 +210,35 @@ public class BluetoothService extends Service {
 
                 final String text = new String(new byte[] { txValue[0] });
 
-                Log.d(TAG,"UART data available");
+                Log.d(TAG,"UART data available. cmd: "+text);
 
-                new Runnable() {
-                    public void run() {
-                        try {
-                            if (text.equals("S")) {
-                                double speed = ByteBuffer.wrap(valueByte).order(ByteOrder.LITTLE_ENDIAN).getDouble();
-                                MyApplication.bikeRide.setLastSpeed(speed);
-
-                            } else if (text.equals("H")) {
-                                String orientation = new String(valueByte, "UTF-8");
-                                //checkHelmet(orientation);
-                                if (orientation.equals("UP")) {
-                                    MyApplication.bikeRide.setWoreHelmetCorrect(true);
-                                }
-                                else {
-                                    MyApplication.bikeRide.setWoreHelmetCorrect(false);
-                                }
-                            }
-
-                            //Firebase newBikeRideRef = ref.child("bikeRides").child(MyApplication.newBikeRideKey);
-                            //newBikeRideRef.setValue(MyApplication.bikeRide);
+                if (text.equals("S")) {
+                    double speed = ByteBuffer.wrap(valueByte).order(ByteOrder.LITTLE_ENDIAN).getDouble();
+                    MyApplication.bikeRide.getSpeedHistory().add(speed);
+                    //Log.d(TAG, "Speed data");
 
 
-                        } catch (Exception e) {
-                            Log.e(TAG, e.toString());
-                        }
+                } else if (text.equals("H")) {
+                    String orientation = null;
+                    try {
+                        orientation = new String(valueByte, "UTF-8");
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
                     }
-                };
+                    //checkHelmet(orientation);
+                    if (orientation.equals("UP")) {
+                        MyApplication.bikeRide.setWoreHelmetCorrect(true);
+                    }
+                    else {
+                        MyApplication.bikeRide.setWoreHelmetCorrect(false);
+                    }
+                }
+                //Log.d(TAG, "New data logged");
+                if (!MyApplication.runUpload){
+                    new Thread(uploadToCloud).start();
+                    MyApplication.runUpload = true;
+                }
+
             }
             //*********************//
             if (action.equals(UartService.DEVICE_DOES_NOT_SUPPORT_UART)) {
@@ -249,6 +281,11 @@ public class BluetoothService extends Service {
             Log.d(TAG,"Start scan");
             scanLeDevice(true);
         }
+
+        //new Thread(uploadToCloud).start();
+        //Log.d(TAG, "onStart called");
+        //MyApplication.runUpload = true;
+        //uploadRunnable = threadPoolExecutor.submit(uploadToCloud);
 
         return super.onStartCommand(intent, flags, startId);
     }
@@ -304,7 +341,7 @@ public class BluetoothService extends Service {
         for (BluetoothDevice listDev : deviceList) {
             if (listDev.getAddress().equals(device.getAddress())) {
                 deviceFound = true;
-                Log.d(TAG,"device found");
+                //Log.d(TAG,"device found");
                 if (device.getAddress().equals(MyApplication.helmetAddress)){
                     MyApplication.helmet_BT_device = device;
                     mUARTServiceHelmet.connect(device.getAddress());
@@ -327,7 +364,7 @@ public class BluetoothService extends Service {
 
         if (!deviceFound) {
             deviceList.add(device);
-            Log.d(TAG, "device added");
+            //Log.d(TAG, "device added");
 
         }
     }
@@ -336,20 +373,161 @@ public class BluetoothService extends Service {
     public void onDestroy() {
         super.onDestroy();
         scanLeDevice(false);
+        Log.d(TAG, "onDestroy  called");
 
         try {
+            mUARTServiceHelmet.disconnect();
+            mUARTServiceBike.disconnect();
+
             LocalBroadcastManager.getInstance(this).unregisterReceiver(UARTStatusChangeReceiver);
+
+            unbindService(mHelmetServiceConnection);
+            mUARTServiceHelmet.stopSelf();
+            mUARTServiceHelmet = null;
+
+            unbindService(mBikeServiceConnection);
+            mUARTServiceBike.stopSelf();
+            mUARTServiceBike = null;
+
         } catch (Exception ignore) {
             Log.e(TAG, ignore.toString());
         }
-        unbindService(mHelmetServiceConnection);
-        mUARTServiceHelmet.stopSelf();
-        mUARTServiceHelmet = null;
 
-        unbindService(mBikeServiceConnection);
-        mUARTServiceBike.stopSelf();
-        mUARTServiceBike = null;
+        MyApplication.runUpload = false;
+        //uploadRunnable.cancel(true);
+
+        // Firebase log
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        String date  = dateFormat.format(new Date());
+
+        Firebase ref = new Firebase(MyApplication.firebase_URL);
+        Firebase logRef = ref.child("log").child("BluetoothServiceEnd");
+        logRef.setValue(date);
+
+    }
+
+    public final Runnable uploadToCloud = new Runnable() {
+
+        @Override
+        public void run() {
+            Log.d(TAG, "Upload runnable call. mScanning: " + mScanning);
+
+            Log.d(TAG, "runUpload bool: " + MyApplication.runUpload);
+            if (MyApplication.runUpload) {
+                Log.d(TAG, "Upload runnable call. mScanning: " + mScanning);
+                MyApplication.bikeRide.setEndTime(System.currentTimeMillis());
+                MyApplication.bikeRide.updateDistance();
+                // Save data to firebase
+                Firebase newBikeRideRef = ref.child("bikeRides").child(MyApplication.newBikeRideKey);
+                newBikeRideRef.setValue(MyApplication.bikeRide);
+
+                // Start new scan
+                if(!mScanning) {
+                    scanLeDevice(true);
+                }
+
+                // Save to ThingSpeak
+                uploadValueToTS();
+
+                // Notify if no helmet
+                if (!MyApplication.bikeRide.isWoreHelmetCorrect()){
+                    NotificationCompat.Builder builder = new NotificationCompat.Builder(getBaseContext());
+                    builder.setContentText( "Remember to use your helmet!" );
+                    builder.setSmallIcon( R.mipmap.ic_launcher );
+                    builder.setContentTitle( getString( R.string.app_name ) );
+                    NotificationManagerCompat.from(getBaseContext()).notify(0, builder.build());
+                }
+
+                if (MyApplication.ridingBike) {
+                    timerHandler.postDelayed(uploadToCloud, 15000);
+                }
+                else {
+                    stopSelf();
+                }
+            }
+            else {
+                //timerHandler.postDelayed(uploadToCloud, 15000);
+            }
+        }
+    };
+
+    public float getBatteryCapacity() {
+        IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+        Intent batteryStatus = this.registerReceiver(null, ifilter);
+
+        int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+        int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+
+        float batteryPct = level / (float) scale;
+        return batteryPct * 100;
+    }
+
+
+
+    private void uploadValueToTS() {
+        final int batt = (int) getBatteryCapacity();
+        //final int v = value;
+        final double speed = MyApplication.bikeRide.getAverageSpeed();
+        final boolean helmetOn = MyApplication.bikeRide.isWoreHelmetCorrect();
+
+        new AsyncTask() {
+            @Override
+            protected Object doInBackground(Object... executeParametre) {
+                StringBuilder sb = new StringBuilder();
+                 sb.append("");
+                 sb.append(speed);
+                 String strI = sb.toString();
+
+
+                StringBuilder sb2 = new StringBuilder();
+                sb2.append("");
+                if (helmetOn){
+                    sb2.append(1);
+                }
+                else {
+                    sb2.append(0);
+                }
+                String strI2 = sb2.toString();
+
+                StringBuilder sb3 = new StringBuilder();
+                sb3.append("");
+                sb3.append(batt);
+                String strI3 = sb3.toString();
+
+                //Post Data
+                List<NameValuePair> nameValuePair = new ArrayList<NameValuePair>(2);
+                nameValuePair.add(new BasicNameValuePair("api_key", MyApplication.WRITE_API_KEY));
+                nameValuePair.add(new BasicNameValuePair("field1", strI));
+                nameValuePair.add(new BasicNameValuePair("field2", strI2));
+                nameValuePair.add(new BasicNameValuePair("field3", strI3));
+
+                //Encoding POST data
+                try {
+                    httpPost.setEntity(new UrlEncodedFormEntity(nameValuePair));
+                } catch (UnsupportedEncodingException e) {
+                    // log exception
+                    e.printStackTrace();
+                }
+
+                //making POST request.
+                try {
+                    HttpResponse response = httpClient.execute(httpPost);
+                    // write response to log
+                    Log.d("Http Post Response:", response.toString());
+                } catch (ClientProtocolException e) {
+                    // Log exception
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    // Log exception
+                    e.printStackTrace();
+                }
+                return 0;  // <5>
+            }
+
+        }.execute();
+
     }
 }
+
 
 

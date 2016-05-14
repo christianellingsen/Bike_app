@@ -10,7 +10,6 @@
             android:orientation="horizontal"
             android:padding="15dp"
             android:gravity="center|center_horizontal">
-
             <Switch
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -20,8 +19,8 @@
                 android:layout_weight="1"
                 android:checked="true" />
 
-
         </LinearLayout>
+
 
     <LinearLayout
         android:layout_width="wrap_content"

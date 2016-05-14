@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-//import com.firebase.client.Firebase;
+import com.firebase.client.Firebase;
 
 /**
  * Created by ce on 31-03-2016.
@@ -13,8 +13,8 @@ import android.util.Log;
 public class MyApplication extends android.app.Application {
 
     // ThingSpeak parameters
-    public static long CHANNEL_ID = 104531;
-    public static String WRITE_API_KEY = "Z1TWGBJK5QJ0YA0H";
+    public static long CHANNEL_ID = 116190;
+    public static String WRITE_API_KEY = "1NTJJB4570409VNW";
     public static String READ_API_KEY = "F18H5802GYB9QG6N";
     public static String TS_ADDRESS = "https://api.thingspeak.com/update";
 
@@ -38,8 +38,14 @@ public class MyApplication extends android.app.Application {
     // Bike ride object
 
     public static BikeRide bikeRide;
+    public static boolean bleServiceStarted = false;
+    public static boolean ridingBike = false;
 
     //Strings
+
+    //Background service
+    public static boolean runUpload = false;
+    public static int standStillCounter = 0;
 
     public static String prefsHelmetAddress = "helmetAddress";
     public static String prefsBikeAddress = "bikeAddress";
@@ -52,7 +58,7 @@ public class MyApplication extends android.app.Application {
     public void onCreate() {
         super.onCreate();
 
-        //Firebase.setAndroidContext(this);
+        Firebase.setAndroidContext(this);
 
         SharedPreferences prefs = getSharedPreferences("com.dtu.susie_bike_app", Context.MODE_PRIVATE);
 

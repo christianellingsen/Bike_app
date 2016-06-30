@@ -78,9 +78,6 @@ public class Main_akt extends AppCompatActivity implements View.OnClickListener,
     private EditText edtMessage;
     private ImageView helmetImage;
 
-    //ThingSpeakChannel tsChannel_write = new ThingSpeakChannel(MyApplication.CHANNEL_ID,MyApplication.WRITE_API_KEY);
-    //Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-    //TalkBack tsTalkBack = new TalkBack(7736,"HD2KH3XWI2Y9T4BB");
     //Button upload_b, maps_b;
     //EditText et;
     //TextView tv;

@@ -22,8 +22,9 @@ public class MyApplication extends android.app.Application {
     public static String GOOGLE_MAPS_API_KEY = "AIzaSyAADiWBqxg9VRH_wueHUcs-EIQp4Oc6-rU";
 
     // Firebase
-    public static final String firebase_URL = "https://vivid-heat-9811.firebaseio.com/Bike_App_v1";
+    public static final String firebase_URL = "https://helmet-alert.firebaseio.com/V1/";
     public static String newBikeRideKey = "";
+    public static String usersString = "users";
 
     // Bluetooth
     public static String helmetAddress = "";
@@ -53,6 +54,10 @@ public class MyApplication extends android.app.Application {
     public static String prefsHelmetConnected = "helmetConn";
     public static String prefsBikeConnected = "bikeConn";
 
+    // Login
+    public static boolean emailExits = false;
+    private static User user = new User();
+
 
     @Override
     public void onCreate() {
@@ -72,5 +77,9 @@ public class MyApplication extends android.app.Application {
         Log.d("Stored device", "Bike address: "+bikeAddress);
 
 
+    }
+
+    public static void setUser(User user) {
+        MyApplication.user = user;
     }
 }

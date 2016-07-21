@@ -49,4 +49,160 @@
     <string name="ble_not_supported">Bluetooth Low Energy not supported</string>
     <string name="scan">Scan</string>
     <string name="cancel">Cancel</string>
+
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="drawer_settings">Settings</string>
+    <string name="nav_my_tournaments">My tournaments</string>
+    <string name="nav_my_profile">My profile</string>
+
+    <string name="mainMenu_commingSoonToast">Not yet implemented. Comming soon :-)</string>
+    <string name="resume_tournament_titleNotComplete">Showing incomplete matches</string>
+    <string name="resume_tournament_titleComplete">Showing complete matches</string>
+    <string name="mainMenu_newButton">New Tournament</string>
+    <string name="mainMenu_Find">Find tournaments</string>
+    <string name="mainMenu_ResumeMatch">Resume active tournament</string>
+    <string name="mainMenu_Favorite">Start favorite</string>
+    <string name="newTournament_header">Make new tournament</string>
+    <string name="newTournament_dialogHeader">New Tournament</string>
+    <string name="newTournament_dialogText">Set tournament name</string>
+    <string name="addplayer_header">Add players</string>
+    <string name="addplayer_2players">You must choose at least 2 players</string>
+    <string name="addplayer_hint">Player name</string>
+    <string name="addplayer_addButton">Add</string>
+    <string name="addplayer_removeButton">Remove selected</string>
+    <string name="addplayer_selectAllButton">Select All</string>
+    <string name="addplayer_done">DONE</string>
+    <string name="maketeams_header">Make teams</string>
+    <string name="maketeams_3players">At least 3 players are needed</string>
+    <string name="maketeams_dialogHeader">Choose tournament type</string>
+    <string name="maketeams_dialogRoundRobin">Round Robin: All teams play versus each other. Highes score wins  \" +                    \"Single Elimination: Knock-out type tournament. Winner of each match progresses. Last teams wins</string>
+    <string name="maketeams_dialogPosButton">Round Robin</string>
+    <string name="maketeams_dialogNegButton">Elimination</string>
+    <string name="maketeams_buttonnNoTeams">No teams</string>
+    <string name="maketeams_buttonnRandom">Random teams</string>
+    <string name="maketeams_buttonManual">Set teams manually</string>
+    <string name="tournamentResume_header">Ready to start</string>
+    <string name="tournamentResume_dialogHeader">Creating new tournament</string>
+    <string name="tournamentResume_dialogText">Uploading to Parse</string>
+    <string name="tournamentResume_teamHeader">Teams</string>
+    <string name="tournamentResume_tournamentHeader">Tournament type</string>
+    <string name="tournamentResume_buttonMatchOffline">Match offline</string>
+    <string name="tournamentResume_buttonMatchOnline">Match online</string>
+    <string name="activeTournament_buttonRank">Rank</string>
+    <string name="activeTournament_buttonMatchlist">View all matches</string>
+    <string name="activeTournament_buttonNext">Play next match</string>
+    <string name="activeTournament_Match">Match #</string>
+    <string name="activeTournament_playNext">Play last match!</string>
+    <string name="activeTournament_done">DONE!</string>
+    <string name="activeTournament_seeWinner">See winner</string>
+    <string name="tournamentWinner_header">Results</string>
+    <string name="tournamentWinner_theWinneris">Tournament winner</string>
+    <string name="tournamentWinner_end">End</string>
+    <string name="addplayer_selectPlayers">Select players</string>
+    <string name="rank_tournamentRank">Tournament rank</string>
+    <string name="rank_listRank">Rank</string>
+    <string name="rank_listName">Name</string>
+    <string name="resume_tournament_buttonShowComplete">Show complete turnaments</string>
+    <string name="resume_tournament_buttonNotComplete">Show incomplete turnaments</string>
+    <string name="resume_tournament_buttonDelete">Delete selected</string>
+    <string name="resume_tournament_buttonResume">Resume selected</string>
+    <string name="resume_tournament_resumeOne">You may only resume one tournament. Select one</string>
+    <string name="findTournament_hint">Enter tournament name</string>
+    <string name="findTournament_searchButton">Search</string>
+    <string name="addplayer_RemoveAllButton">Remove all</string>
+    <string name="notOnline">You are not online. Turnament will be offline</string>
+    <string name="title_activity_test_material_design">testMaterialDesign</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="navigation_item1">Item 1</string>
+    <string name="navigation_item2">Item 2</string>
+    <string name="navigation_item3">Item 3</string>
+    <string name="navigation_item4">Item 4</string>
+    <string name="drawer_close">Drawer close</string>
+    <string name="drawer_open">Drawer open</string>
+    <string name="title_activity_logon_akt">logon_akt</string>
+    <string name="facebook_app_id">1684225831809319</string>
+    <string name="title_activity_login">Sign in</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Log in</string>
+    <string name="action_sign_in_short">Log in</string>
+    <string name="error_invalid_email">This email address is invalid</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_incorrect_password">This password is incorrect</string>
+    <string name="error_field_required">This field is required</string>
+    <string name="permission_rationale">"Contacts permissions are needed for providing email
+        completions."
+    </string>
+    <string name="Make_teams">Make teams</string>
+    <string name="tournament_type">Tournament type</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="action_home">Home</string>
+    <string name="title_activity_welcome_screen_akt">WelcomeScreen_akt</string>
+    <string name="section_format">Welcome guide part: %1$d</string>
+    <string name="title_activity_settings_akt">Settings</string>
+
+    <!-- Strings related to Settings -->
+
+    <!-- Example General settings -->
+    <string name="pref_header_general">General</string>
+
+    <string name="pref_title_social_recommendations">Enable social recommendations</string>
+    <string name="pref_description_social_recommendations">Recommendations for people to contact
+        based on your message history
+    </string>
+
+    <string name="pref_title_display_name">Display name</string>
+    <string name="pref_default_display_name">John Smith</string>
+
+    <string name="pref_title_add_friends_to_messages">Add friends to messages</string>
+    <string-array name="pref_example_list_titles">
+        <item>Always</item>
+        <item>When possible</item>
+        <item>Never</item>
+    </string-array>
+    <string-array name="pref_example_list_values">
+        <item>1</item>
+        <item>0</item>
+        <item>-1</item>
+    </string-array>
+
+    <!-- Example settings for Data & Sync -->
+    <string name="pref_header_data_sync">Data &amp; sync</string>
+
+    <string name="pref_title_sync_frequency">Sync frequency</string>
+    <string-array name="pref_sync_frequency_titles">
+        <item>15 minutes</item>
+        <item>30 minutes</item>
+        <item>1 hour</item>
+        <item>3 hours</item>
+        <item>6 hours</item>
+        <item>Never</item>
+    </string-array>
+    <string-array name="pref_sync_frequency_values">
+        <item>15</item>
+        <item>30</item>
+        <item>60</item>
+        <item>180</item>
+        <item>360</item>
+        <item>-1</item>
+    </string-array>
+
+    <string name="pref_title_system_sync_settings">System sync settings</string>
+
+    <!-- Example settings for Notifications -->
+    <string name="pref_header_notifications">Notifications</string>
+
+    <string name="pref_title_new_message_notifications">New message notifications</string>
+
+    <string name="pref_title_ringtone">Ringtone</string>
+    <string name="pref_ringtone_silent">Silent</string>
+
+    <string name="pref_title_vibrate">Vibrate</string>
 </resources>

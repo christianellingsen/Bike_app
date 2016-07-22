@@ -1,4 +1,4 @@
-package com.dtu.susie_app2.Login;
+package com.dtu.helmet_alert.login;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
@@ -18,16 +19,24 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.dtu.susie_app2.Main_akt;
-import com.dtu.susie_app2.MyApplication;
-import com.dtu.susie_app2.R;
-import com.dtu.susie_app2.User;
+import com.dtu.helmet_alert.DebugUartBT;
+import com.dtu.helmet_alert.MainActivity;
+import com.dtu.helmet_alert.MyApplication;
+import com.dtu.helmet_alert.R;
+import com.dtu.helmet_alert.User;
 import com.firebase.client.AuthData;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -41,10 +50,17 @@ public class SignUp extends AppCompatActivity {
     EditText mFirstName,mLastName,mEmail,mPassword,mPasswordRepeat;
     Button signIn;
 
+    String TAG = "SignUp_activity";
+
+    // Firebase Google update
+    FirebaseAuth mAuth;
+    DatabaseReference mDatabase;
+
     private View mProgressView;
     private View mSignFormView;
     Handler handler = new Handler();
     boolean doneEmailCheck;
+    int emailCheckCounter = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,12 +74,15 @@ public class SignUp extends AppCompatActivity {
         mPasswordRepeat = (EditText) findViewById(R.id.welcome_password_rep_et);
         signIn = (Button) findViewById(R.id.signUp_b);
 
+        mAuth = FirebaseAuth.getInstance();
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+
         signIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d("email", "Email: " + mEmail.getText().toString());
                 doneEmailCheck =false;
-                emailExists(mEmail.getText().toString());
+                //emailExists(mEmail.getText().toString());
                 new Thread(resumeWhenReady).start();
             }
         });
@@ -140,53 +159,32 @@ public class SignUp extends AppCompatActivity {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             //createUser(firstName,lastName,email,password,passwordRep);
+            Log.d("SignUp","Starting signup");
             showProgress(true);
-            ref.createUser(email, password, new Firebase.ValueResultHandler<Map<String, Object>>() {
+            mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                 @Override
-                public void onSuccess(Map<String, Object> result) {
-                    System.out.println("Successfully created user account with uid: " + result.get("uid"));
+                public void onComplete(@NonNull Task<AuthResult> task) {
 
-                    ref.authWithPassword(email, password,
-                            new Firebase.AuthResultHandler() {
+                    Log.d(TAG,"createUser:comlete"+task.isComplete());
 
-                                @Override
-                                public void onAuthenticated(AuthData authData) {
-                                    // Authentication just completed successfully :)
+                    User user = new User();
+                    user.setFirstName(firstName);
+                    user.setLastName(lastName);
+                    user.setEmail(email);
+                    user.setProvider(mAuth.getCurrentUser().getProviderId());
+                    user.setU_ID(mAuth.getCurrentUser().getUid());
 
-                                    User user = new User();
-                                    user.setFirstName(firstName);
-                                    user.setLastName(lastName);
-                                    user.setEmail(email);
-                                    user.setU_ID(authData.getUid());
-                                    user.setProvider(authData.getProvider());
-                                    //user.setStoredTournamentsID(new HashSet<String>());
-                                    MyApplication.setUser(user);
-                                    ref.child("users").child(authData.getUid()).setValue(user);
 
-                                    SharedPreferences prefs = getSharedPreferences("com.dtu.tournamate_v1", Context.MODE_PRIVATE);
-                                    prefs.edit().putString("uID",user.getU_ID()).apply();
-                                    prefs.edit().putString("firstName", firstName).apply();
-                                    prefs.edit().putString("lastName",lastName).apply();
-                                    prefs.edit().putString("email",email).apply();
-                                    prefs.edit().putStringSet("tournaments",new HashSet<String>()).apply();
-                                    prefs.edit().commit();
+                    String key = mDatabase.child(MyApplication.usersString).push().getKey();
+                    user.setU_key(key);
+                    mDatabase.child(MyApplication.usersString).child(key).setValue(user);
 
-                                    Log.d("Sign up", "Sign up success!");
-                                    startActivity(new Intent(getBaseContext(), Main_akt.class));
 
-                                }
+                    startActivity(new Intent(getBaseContext(), MainActivity.class));
 
-                                @Override
-                                public void onAuthenticationError(FirebaseError error) {
-                                    Log.d("Sign up", "Sign up failed:" + error.getMessage());
-                                    System.out.println("Sign up failed:" + error.getMessage());
-                                }
-                            });
-                }
-
-                @Override
-                public void onError(FirebaseError firebaseError) {
-                    // there was an error
+                    if (!task.isSuccessful()){
+                        Toast.makeText(SignUp.this,"Authentication failed.",Toast.LENGTH_SHORT).show();
+                    }
                 }
             });
         }
@@ -275,13 +273,17 @@ public class SignUp extends AppCompatActivity {
 
         @Override
         public void run() {
-            if (doneEmailCheck) {
+
+            if (doneEmailCheck || emailCheckCounter>=5) {
                 Log.d("email", "start attemptLogin");
                 attemptLogin();
             }
             else {
                 Log.d("email", "delay");
-                handler.postDelayed(resumeWhenReady, 500);
+                handler.postDelayed(resumeWhenReady, 200);
+                emailCheckCounter++;
+                // FOR EMPTY DATABASE. REMOVE AFTER INIT
+                //doneEmailCheck = true;
             }
         }
     };
@@ -326,7 +328,7 @@ public class SignUp extends AppCompatActivity {
                                 prefs.edit().commit();
 
                                 Log.d("Sign up", "Sign up success!");
-                                startActivity(new Intent(getBaseContext(), Main_akt.class));
+                                startActivity(new Intent(getBaseContext(), DebugUartBT.class));
 
                             }
 

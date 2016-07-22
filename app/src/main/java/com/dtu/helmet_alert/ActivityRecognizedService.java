@@ -1,10 +1,9 @@
-package com.dtu.susie_app2;
+package com.dtu.helmet_alert;
 
 import android.app.IntentService;
 import android.content.Intent;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.NotificationCompat;
-import android.text.style.TtsSpan;
 import android.util.Log;
 
 import com.firebase.client.Firebase;

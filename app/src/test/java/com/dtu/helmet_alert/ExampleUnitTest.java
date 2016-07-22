@@ -1,4 +1,4 @@
-package com.dtu.susie_app2;
+package com.dtu.helmet_alert;
 
 import org.junit.Test;
 

@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "805989816838",
+    "firebase_url": "https://helmet-alert.firebaseio.com",
+    "project_id": "helmet-alert",
+    "storage_bucket": "helmet-alert.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:805989816838:android:9bdba229415006ab",
+        "android_client_info": {
+          "package_name": "com.dtu.helmet_alert"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "805989816838-4u6jih9mr5kgb5fa2segifi3a7spddib.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAnZibEqPPEr9JXr2tNEjY_4Zc62X6IIhs"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

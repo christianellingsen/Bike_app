@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_trips"
+            android:icon="@drawable/ic_menu_manage"
+            android:title="Trips" />
+        <item
+            android:id="@+id/nav_friends"
+            android:icon="@drawable/ic_menu_manage"
+            android:title="Friends" />
+        <item
+            android:id="@+id/nav_calibrate_helmet"
+            android:icon="@drawable/ic_menu_manage"
+            android:title="Calibrate helmet" />
+        <item
+            android:id="@+id/nav_settings"
+            android:icon="@drawable/ic_menu_manage"
+            android:title="Settings" />
+    </group>
+
+    <item android:title="Communicate">
+        <menu>
+            <item
+                android:id="@+id/nav_about"
+                android:icon="@drawable/ic_menu_manage"
+                android:title="About" />
+            <item
+                android:id="@+id/nav_logout"
+                android:icon="@drawable/ic_menu_manage"
+                android:title="Log out" />
+        </menu>
+    </item>
+
+</menu>

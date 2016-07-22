@@ -1,4 +1,4 @@
-package com.dtu.susie_app2;
+package com.dtu.helmet_alert;
 
 /**
  * Created by chris on 12-05-2016.
@@ -9,24 +9,14 @@ import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.os.AsyncTask;
-import android.os.BatteryManager;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -42,32 +32,19 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.ActivityRecognition;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 
-public class MainScreen extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class ConnectToBT extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private static final int REQUEST_SELECT_DEVICE = 1;
     private static final int REQUEST_ENABLE_BT = 2;
     private static final int UART_PROFILE_READY = 10;
-    public static final String TAG = "MainScreen";
+    public static final String TAG = "ConnectToBT";
     private static final int UART_PROFILE_CONNECTED = 20;
     private static final int UART_PROFILE_DISCONNECTED = 21;
     private static final int STATE_OFF = 10;
@@ -196,7 +173,7 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
 
                         //Connect button pressed, open DeviceListActivity class, with popup windows that scan for devices
 
-                        Intent newIntent = new Intent(MainScreen.this, DeviceListActivity.class);
+                        Intent newIntent = new Intent(ConnectToBT.this, DeviceListActivity.class);
                         startActivityForResult(newIntent, REQUEST_SELECT_DEVICE);
                     } else {
                         //Disconnect button pressed
@@ -225,7 +202,7 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
                     if (connect_bike_b.getText().equals("Connect")) {
                         //Connect button pressed, open DeviceListActivity class, with popup windows that scan for devices
 
-                        Intent newIntent = new Intent(MainScreen.this, DeviceListActivity.class);
+                        Intent newIntent = new Intent(ConnectToBT.this, DeviceListActivity.class);
                         startActivityForResult(newIntent, REQUEST_SELECT_DEVICE);
                     } else {
                         //Disconnect button pressed
@@ -291,7 +268,7 @@ public class MainScreen extends AppCompatActivity implements GoogleApiClient.Con
 
             @Override
             protected void onPostExecute(Object result) {
-                Toast.makeText(MainScreen.this, "Done!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(ConnectToBT.this, "Done!", Toast.LENGTH_SHORT).show();
                 Log.d("Http post", "Posted to field3: " + g + " and field2: " + batt);
             }
         }.execute(10);

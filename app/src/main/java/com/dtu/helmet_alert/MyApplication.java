@@ -1,4 +1,4 @@
-package com.dtu.susie_app2;
+package com.dtu.helmet_alert;
 
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
@@ -6,6 +6,8 @@ import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.firebase.client.Firebase;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 /**
  * Created by ce on 31-03-2016.
@@ -64,6 +66,11 @@ public class MyApplication extends android.app.Application {
         super.onCreate();
 
         Firebase.setAndroidContext(this);
+        Firebase.getDefaultConfig().setPersistenceEnabled(true);
+
+        FirebaseDatabase db = FirebaseDatabase.getInstance();
+        DatabaseReference ref = db.getReference("debug");
+        ref.setValue("Connected,OK!");
 
         SharedPreferences prefs = getSharedPreferences("com.dtu.susie_bike_app", Context.MODE_PRIVATE);
 

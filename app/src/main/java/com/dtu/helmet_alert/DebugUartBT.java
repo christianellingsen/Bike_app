@@ -1,4 +1,4 @@
-package com.dtu.susie_app2;
+package com.dtu.helmet_alert;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -13,11 +13,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.res.Configuration;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.BatteryManager;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -32,8 +30,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.RadioGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
 //import com.google.android.gms.appindexing.Action;
@@ -57,7 +53,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class Main_akt extends AppCompatActivity implements View.OnClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class DebugUartBT extends AppCompatActivity implements View.OnClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private static final int REQUEST_SELECT_DEVICE = 1;
     private static final int REQUEST_ENABLE_BT = 2;
@@ -151,7 +147,7 @@ public class Main_akt extends AppCompatActivity implements View.OnClickListener,
 
                         //Connect button pressed, open DeviceListActivity class, with popup windows that scan for devices
 
-                        Intent newIntent = new Intent(Main_akt.this, DeviceListActivity.class);
+                        Intent newIntent = new Intent(DebugUartBT.this, DeviceListActivity.class);
                         startActivityForResult(newIntent, REQUEST_SELECT_DEVICE);
                     } else {
                         //Disconnect button pressed
@@ -255,7 +251,7 @@ public class Main_akt extends AppCompatActivity implements View.OnClickListener,
 
             @Override
             protected void onPostExecute(Object result) {
-                Toast.makeText(Main_akt.this, "Done!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(DebugUartBT.this, "Done!", Toast.LENGTH_SHORT).show();
                 Log.d("Http post", "Posted to field3: " + g + " and field2: " + batt);
             }
         }.execute(10);
@@ -425,7 +421,7 @@ public class Main_akt extends AppCompatActivity implements View.OnClickListener,
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         Action viewAction = Action.newAction(
                 Action.TYPE_VIEW, // TODO: choose an action type.
-                "Main_akt Page", // TODO: Define a title for the content shown.
+                "DebugUartBT Page", // TODO: Define a title for the content shown.
                 // TODO: If you have web page content that matches this app activity's content,
                 // make sure this auto-generated web page URL is correct.
                 // Otherwise, set the URL to null.
@@ -461,7 +457,7 @@ public class Main_akt extends AppCompatActivity implements View.OnClickListener,
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         Action viewAction = Action.newAction(
                 Action.TYPE_VIEW, // TODO: choose an action type.
-                "Main_akt Page", // TODO: Define a title for the content shown.
+                "DebugUartBT Page", // TODO: Define a title for the content shown.
                 // TODO: If you have web page content that matches this app activity's content,
                 // make sure this auto-generated web page URL is correct.
                 // Otherwise, set the URL to null.

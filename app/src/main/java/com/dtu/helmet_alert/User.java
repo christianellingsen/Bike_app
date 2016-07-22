@@ -1,4 +1,4 @@
-package com.dtu.susie_app2;
+package com.dtu.helmet_alert;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -17,9 +17,11 @@ public class User {
     //private String imageURL;
     private ArrayList<String> storedTournamentsID;
     private ArrayList<String> storedPlayers;
+    private String u_key;
 
     public User() {
         this.u_ID = "";
+        this.u_key = "";
         this.firstName = "";
         this.lastName = "";
         this.email ="";
@@ -88,5 +90,13 @@ public class User {
     @JsonIgnore
     public String getFullName(){
         return this.firstName + " " + this.lastName;
+    }
+
+    public void setU_key(String key) {
+        this.u_key = key;
+    }
+
+    public String getU_key() {
+        return u_key;
     }
 }

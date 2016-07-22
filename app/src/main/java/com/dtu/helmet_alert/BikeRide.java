@@ -1,6 +1,4 @@
-package com.dtu.susie_app2;
-
-import android.util.Log;
+package com.dtu.helmet_alert;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 

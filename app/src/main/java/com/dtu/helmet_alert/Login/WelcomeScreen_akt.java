@@ -1,4 +1,4 @@
-package com.dtu.susie_app2.Login;
+package com.dtu.helmet_alert.login;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,6 +7,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,11 +15,12 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.commit451.inkpageindicator.InkPageIndicator;
-import com.dtu.susie_app2.Main_akt;
-import com.dtu.susie_app2.MyApplication;
-import com.dtu.susie_app2.R;
-import com.firebase.client.AuthData;
+import com.dtu.helmet_alert.MainActivity;
+import com.dtu.helmet_alert.MyApplication;
+import com.dtu.helmet_alert.R;
 import com.firebase.client.Firebase;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 
 public class WelcomeScreen_akt extends AppCompatActivity implements View.OnClickListener {
@@ -52,9 +54,12 @@ public class WelcomeScreen_akt extends AppCompatActivity implements View.OnClick
         inkPageIndicator.setViewPager(mViewPager);
 
         // Check if already logged in
-        AuthData authData = ref.getAuth();
-        if (authData != null) {
-            startActivity(new Intent(getBaseContext(), Main_akt.class));
+
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        FirebaseUser user = mAuth.getCurrentUser();
+        if ( user != null) {
+            Log.d("welcome screen","Already logged in");
+            startActivity(new Intent(getBaseContext(), MainActivity.class));
         }
 
     }

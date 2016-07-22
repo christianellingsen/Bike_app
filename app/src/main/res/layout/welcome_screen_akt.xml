@@ -41,7 +41,7 @@
                     android:layout_centerVertical="true"
                     android:layout_alignParentStart="true"
                     android:id="@+id/welcome_sign_up_b"
-                    android:textColor="#bee6eb"
+                    android:textColor="@color/colorAccent"
                     android:background="@drawable/startscreen_button"/>
                 <Button
                     android:layout_width="100dp"
@@ -52,7 +52,7 @@
                     android:layout_centerVertical="true"
                     android:layout_alignParentEnd="true"
                     android:id="@+id/welcome_login_b"
-                    android:textColor="#bee6eb"
+                    android:textColor="@color/colorAccent"
                     android:background="@drawable/startscreen_button"/>
 
             </RelativeLayout>

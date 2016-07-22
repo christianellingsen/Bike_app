@@ -13,12 +13,17 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 
 import com.dtu.helmet_alert.login.WelcomeScreen_akt;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+
+    TextView username;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +49,17 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+
+        View header = navigationView.getHeaderView(0);
+        username = (TextView) header.findViewById(R.id.drawerTop_userName);
+        //username.setText(user.getDisplayName());
+        //TODO store user on sign in or login, and get users name from MyApplication object.
+        username.setText("Username");
+
     }
 
     @Override
@@ -89,9 +105,9 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_friends) {
 
         } else if (id == R.id.nav_calibrate_helmet) {
-
+            startActivity(new Intent(this, CalibrateHelmet.class));
         } else if (id == R.id.nav_settings) {
-
+            startActivity(new Intent(this, ConnectToBT.class));
         } else if (id == R.id.nav_about) {
 
         } else if (id == R.id.nav_logout) {

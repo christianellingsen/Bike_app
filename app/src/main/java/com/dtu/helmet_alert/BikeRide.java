@@ -25,6 +25,9 @@ public class BikeRide {
     String date;                    // Date for ride
     private String durationString;
 
+    private ArrayList<String> violationTimeStamp;
+    private ArrayList<String> violationType;
+
     public BikeRide() {
 
         this.totalDistanceKM = 0.0;
@@ -37,6 +40,9 @@ public class BikeRide {
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
         this.date = dateFormat.format(new Date());
         this.durationString = "";
+
+        violationTimeStamp = new ArrayList<>();
+        violationType = new ArrayList<>();
 
         //Log.d("Distance","Trip init. Distance: " + totalDistanceKM+ " and speed: " +averageSpeed);
 
@@ -169,4 +175,19 @@ public class BikeRide {
         }
     }
 
+    public ArrayList<String> getViolationTimeStamp() {
+        return violationTimeStamp;
+    }
+
+    public void setViolationTimeStamp(ArrayList<String> violationTimeStamp) {
+        this.violationTimeStamp = violationTimeStamp;
+    }
+
+    public ArrayList<String> getViolationType() {
+        return violationType;
+    }
+
+    public void setViolationType(ArrayList<String> violationType) {
+        this.violationType = violationType;
+    }
 }

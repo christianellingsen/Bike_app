@@ -68,7 +68,8 @@ public class BluetoothService extends Service {
     private static final int STATE_OFF = 10;
 
     private int mHelmetState, mBikeState = UART_PROFILE_DISCONNECTED;
-    private UartService mUARTServiceHelmet, mUARTServiceBike = null;
+    //private UartService mUARTServiceHelmet, mUARTServiceBike = null;
+    private HelmetService mHelmetService;
     private BluetoothDevice mHelmetDevice, mBikeDevice = null;
     private BluetoothAdapter mBtAdapter = null;
 
@@ -76,9 +77,6 @@ public class BluetoothService extends Service {
 
     HttpClient httpClient = new DefaultHttpClient();
     HttpPost httpPost = new HttpPost(MyApplication.TS_ADDRESS);
-
-    ExecutorService threadPoolExecutor = Executors.newSingleThreadExecutor();
-    Future uploadRunnable;
 
 
     @Override
@@ -122,12 +120,12 @@ public class BluetoothService extends Service {
     }
 
 
-    //UART service connected/disconnected
+    //Helmet service connected/disconnected
     private ServiceConnection mHelmetServiceConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder rawBinder) {
-            mUARTServiceHelmet = ((UartService.LocalBinder) rawBinder).getService();
-            Log.d(TAG, "onServiceConnected mUARTServiceHelmet= " + mUARTServiceHelmet);
-            if (!mUARTServiceHelmet.initialize()) {
+            mHelmetService = ((HelmetService.LocalBinder) rawBinder).getService();
+            Log.d(TAG, "onServiceConnected mHelmetService= " + mHelmetService);
+            if (!mHelmetService.initialize()) {
                 Log.e(TAG, "Unable to initialize Bluetooth");
             }
 
@@ -135,26 +133,11 @@ public class BluetoothService extends Service {
 
         public void onServiceDisconnected(ComponentName classname) {
             ////     mUARTServiceHelmet.disconnect(mHelmetDevice);
-            mUARTServiceHelmet = null;
+            mHelmetService = null;
         }
     };
 
-    //UART service connected/disconnected
-    private ServiceConnection mBikeServiceConnection = new ServiceConnection() {
-        public void onServiceConnected(ComponentName className, IBinder rawBinder) {
-            mUARTServiceBike = ((UartService.LocalBinder) rawBinder).getService();
-            Log.d(TAG, "onServiceConnected mUARTServiceBike= " + mUARTServiceBike);
-            if (!mUARTServiceBike.initialize()) {
-                Log.e(TAG, "Unable to initialize Bluetooth");
-            }
 
-        }
-
-        public void onServiceDisconnected(ComponentName classname) {
-            ////     mUARTServiceHelmet.disconnect(mHelmetDevice);
-            mUARTServiceBike = null;
-        }
-    };
 
     private final BroadcastReceiver UARTStatusChangeReceiver = new BroadcastReceiver() {
 
@@ -163,8 +146,8 @@ public class BluetoothService extends Service {
 
             final Intent mIntent = intent;
             //*********************//
-            if (action.equals(UartService.ACTION_GATT_CONNECTED)) {
-                Log.d(TAG, "UART_CONNECT_MSG");
+            if (action.equals(HelmetService.ACTION_GATT_CONNECTED)) {
+                Log.d(TAG, "HELMET_CONNECT_MSG");
 
 
                 if (MyApplication.helmetConnect) {
@@ -177,38 +160,39 @@ public class BluetoothService extends Service {
             }
 
             //*********************//
-            if (action.equals(UartService.ACTION_GATT_DISCONNECTED)) {
-                Log.d(TAG, "UART_DISCONNECT_MSG");
+            if (action.equals(HelmetService.ACTION_GATT_DISCONNECTED)) {
+                Log.d(TAG, "HELMET_DISCONNECT_MSG");
                 MyApplication.bikeRide.setWoreHelmetCorrect(false);
                 if(!MyApplication.helmetConnect && mHelmetDevice!=null) {
                     mHelmetState = UART_PROFILE_DISCONNECTED;
-                    mUARTServiceHelmet.close();
-                    Log.d(TAG, "UART_DISCONNECT_HELMET");
+                    mHelmetService.close();
+                    Log.d(TAG, "DISCONNECT_HELMET");
                 }
 
                 else if(!MyApplication.bikeConnect && mBikeDevice!=null) {
                     mBikeState = UART_PROFILE_DISCONNECTED;
-                    mUARTServiceBike.close();
+                    mHelmetService.close();
                 }
 
             }
 
 
             //*********************//
-            if (action.equals(UartService.ACTION_GATT_SERVICES_DISCOVERED)) {
-                mUARTServiceHelmet.enableTXNotification();
+            if (action.equals(HelmetService.ACTION_GATT_SERVICES_DISCOVERED)) {
+                mHelmetService.enableTXNotification();
             }
             //*********************//
 
-            if (action.equals(UartService.ACTION_DATA_AVAILABLE)) {
+            if (action.equals(HelmetService.ACTION_DATA_AVAILABLE)) {
 
-                final byte[] txValue = intent.getByteArrayExtra(UartService.EXTRA_DATA);
-                final byte [] valueByte = Arrays.copyOfRange(txValue, 1, txValue.length);
+                //final byte[] txValue = intent.getByteArrayExtra(UartService.EXTRA_DATA);
+                //final byte [] valueByte = Arrays.copyOfRange(txValue, 1, txValue.length);
 
-                final String text = new String(new byte[] { txValue[0] });
+                //final String text = new String(new byte[] { txValue[0] });
 
-                Log.d(TAG,"UART data available. cmd: "+text);
+                Log.d(TAG,"ACTION_DATA_AVAILABLE");
 
+                /**
                 if (text.equals("S")) {
                     double speed = ByteBuffer.wrap(valueByte).order(ByteOrder.LITTLE_ENDIAN).getDouble();
                     MyApplication.bikeRide.getSpeedHistory().add(speed);
@@ -235,11 +219,12 @@ public class BluetoothService extends Service {
                     new Thread(uploadToCloud).start();
                     MyApplication.runUpload = true;
                 }
+                 **/
 
             }
             //*********************//
-            if (action.equals(UartService.DEVICE_DOES_NOT_SUPPORT_UART)) {
-                mUARTServiceHelmet.disconnect();
+            if (action.equals(HelmetService.DEVICE_DOES_NOT_SUPPORT_UART)) {
+                mHelmetService.disconnect();
             }
 
 
@@ -249,11 +234,10 @@ public class BluetoothService extends Service {
 
 
     private void service_init() {
-        Intent bindIntentHelmet = new Intent(this, UartService.class);
+        Intent bindIntentHelmet = new Intent(this, HelmetService.class);
         bindService(bindIntentHelmet, mHelmetServiceConnection, Context.BIND_AUTO_CREATE);
 
-        Intent bindIntentBike = new Intent(this, UartService.class);
-        bindService(bindIntentBike, mBikeServiceConnection, Context.BIND_AUTO_CREATE);
+        mHelmetService.initialize();
 
         LocalBroadcastManager.getInstance(this).registerReceiver(UARTStatusChangeReceiver, makeGattUpdateIntentFilter());
 
@@ -261,11 +245,11 @@ public class BluetoothService extends Service {
 
     private static IntentFilter makeGattUpdateIntentFilter() {
         final IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(UartService.ACTION_GATT_CONNECTED);
-        intentFilter.addAction(UartService.ACTION_GATT_DISCONNECTED);
-        intentFilter.addAction(UartService.ACTION_GATT_SERVICES_DISCOVERED);
-        intentFilter.addAction(UartService.ACTION_DATA_AVAILABLE);
-        intentFilter.addAction(UartService.DEVICE_DOES_NOT_SUPPORT_UART);
+        intentFilter.addAction(HelmetService.ACTION_GATT_CONNECTED);
+        intentFilter.addAction(HelmetService.ACTION_GATT_DISCONNECTED);
+        intentFilter.addAction(HelmetService.ACTION_GATT_SERVICES_DISCOVERED);
+        intentFilter.addAction(HelmetService.ACTION_DATA_AVAILABLE);
+        intentFilter.addAction(HelmetService.DEVICE_DOES_NOT_SUPPORT_UART);
         return intentFilter;
     }
 
@@ -341,17 +325,10 @@ public class BluetoothService extends Service {
                 //Log.d(TAG,"device found");
                 if (device.getAddress().equals(MyApplication.helmetAddress)){
                     MyApplication.helmet_BT_device = device;
-                    mUARTServiceHelmet.connect(device.getAddress());
+                    Log.d(TAG,"Adding device: "+ device.getName());
+                    mHelmetService.connect(device.getAddress());
                     Log.d(TAG,"Connected to helmet");
                 }
-
-                else if (device.getAddress().equals(MyApplication.bikeAddress)){
-                    MyApplication.bike_BT_device = device;
-                    mUARTServiceBike.connect(device.getAddress());
-                    Log.d(TAG,"Connected to bike");
-                }
-
-
 
                 break;
             }
@@ -373,18 +350,14 @@ public class BluetoothService extends Service {
         Log.d(TAG, "onDestroy  called");
 
         try {
-            mUARTServiceHelmet.disconnect();
-            mUARTServiceBike.disconnect();
+            mHelmetService.disconnect();
 
             LocalBroadcastManager.getInstance(this).unregisterReceiver(UARTStatusChangeReceiver);
 
             unbindService(mHelmetServiceConnection);
-            mUARTServiceHelmet.stopSelf();
-            mUARTServiceHelmet = null;
+            mHelmetService.stopSelf();
+            mHelmetService = null;
 
-            unbindService(mBikeServiceConnection);
-            mUARTServiceBike.stopSelf();
-            mUARTServiceBike = null;
 
         } catch (Exception ignore) {
             Log.e(TAG, ignore.toString());

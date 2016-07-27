@@ -105,7 +105,10 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_friends) {
 
         } else if (id == R.id.nav_calibrate_helmet) {
-            startActivity(new Intent(this, CalibrateHelmet.class));
+            getSupportFragmentManager().beginTransaction()
+                    .addToBackStack(null)
+                    .replace(R.id.main_frame, new CalibrateHelmet())
+                    .commit();
         } else if (id == R.id.nav_settings) {
             startActivity(new Intent(this, ConnectToBT.class));
         } else if (id == R.id.nav_about) {

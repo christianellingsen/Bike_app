@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:src="@drawable/cross"
+        android:id="@+id/calibrate_helmet_checkCross" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:weightSum="10"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp">
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="80dp"
+            android:layout_gravity="center_vertical"
+            android:src="@drawable/arrow_cw"
+            android:id="@+id/calibrate_helmet_arrow_cw"
+            android:layout_weight="2"/>
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:id="@+id/calibrate_helmet_helmet"
+            android:src="@drawable/helmet_side_bw"
+            android:layout_weight="6"/>
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="80dp"
+            android:src="@drawable/arrow_ccw"
+            android:id="@+id/calibrate_helmet_arrow_ccw"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="2"/>
+    </LinearLayout>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Connect to helmet"
+        android:id="@+id/calibrate_helmet_connectButton"
+        android:layout_gravity="center_horizontal" />
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/calibrate_helmet_accDataList">
+
+    </ListView>
+
+
+</LinearLayout>

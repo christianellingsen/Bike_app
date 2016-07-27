@@ -13,7 +13,7 @@
         android:id="@+id/navigation_drawer_user_account_picture_profile"
         android:layout_width="@dimen/nav_drawer_profile_image_size"
         android:layout_height="@dimen/nav_drawer_profile_image_size"
-        android:src="@drawable/ic_account_circle_black_48dp"
+        android:src="@drawable/ic_menu_manage"
         android:layout_above="@+id/drawerTop_userName"
         android:layout_alignStart="@+id/drawerTop_userName" />
 

@@ -296,7 +296,7 @@ public class ConnectToBT extends AppCompatActivity implements GoogleApiClient.Co
 
                     temp_device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(deviceAddress);
 
-                    if (temp_device.getName().equals("Helmet")){
+                    if (temp_device.getName().equals("HelmetAlert_H")){
                         mHelmetDevice = temp_device;
 
                         //MyApplication.helmetConnect = true;
@@ -313,7 +313,7 @@ public class ConnectToBT extends AppCompatActivity implements GoogleApiClient.Co
                         prefs.edit().putString(MyApplication.prefsHelmetAddress,MyApplication.helmetAddress).commit();
 
                     }
-                    else if (temp_device.getName().equals("Bike")){
+                    else if (temp_device.getName().equals("HelmetAlert_B")){
                         mBikeDevice = temp_device;
 
                         //MyApplication.bikeConnect = true;

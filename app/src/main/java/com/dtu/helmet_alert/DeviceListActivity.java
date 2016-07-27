@@ -146,6 +146,7 @@ public class DeviceListActivity extends Activity {
                                 public void run() {
                                     // TEST!! Only scan for "Helmet devices
                                     //if (device.getName().equals("Helmet")) {
+                                    //Log.d(TAG,"Device found! "+ device.getName());
                                     addDevice(device, rssi);
                                     //}
                                 }

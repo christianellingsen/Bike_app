@@ -15,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.dtu.helmet_alert.friends.FriendsList;
 import com.dtu.helmet_alert.login.WelcomeScreen_akt;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -32,14 +33,6 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -58,7 +51,7 @@ public class MainActivity extends AppCompatActivity
         username = (TextView) header.findViewById(R.id.drawerTop_userName);
         //username.setText(user.getDisplayName());
         //TODO store user on sign in or login, and get users name from MyApplication object.
-        username.setText("Username");
+        username.setText(MyApplication.getUser().getFullName());
 
     }
 
@@ -103,7 +96,10 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.nav_trips) {
             // Handle the camera action
         } else if (id == R.id.nav_friends) {
-
+            getSupportFragmentManager().beginTransaction()
+                    .addToBackStack(null)
+                    .replace(R.id.main_frame, new FriendsList())
+                    .commit();
         } else if (id == R.id.nav_calibrate_helmet) {
             getSupportFragmentManager().beginTransaction()
                     .addToBackStack(null)

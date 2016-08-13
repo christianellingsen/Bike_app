@@ -63,7 +63,7 @@
             android:layout_height="150dp"
             android:id="@+id/connected_to_helemet_img"
             android:layout_marginRight="40dp"
-            android:src="@drawable/bike_helmet_bw"/>
+            android:src="@drawable/helmet_bw"/>
         <ImageView
             android:layout_width="150dp"
             android:layout_height="150dp"

@@ -450,7 +450,7 @@ public class ConnectToBT extends AppCompatActivity implements GoogleApiClient.Co
             helmetImage.setImageResource(R.drawable.bike_helmet_check);
         }
         else{
-            helmetImage.setImageResource(R.drawable.bike_helmet_bw);
+            helmetImage.setImageResource(R.drawable.helmet_bw);
         }
         if (MyApplication.bikeAddress.length()>1){
             bikeImage.setImageResource(R.drawable.bike_check);

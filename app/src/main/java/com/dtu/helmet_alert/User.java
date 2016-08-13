@@ -1,6 +1,7 @@
 package com.dtu.helmet_alert;
 
 
+import com.dtu.helmet_alert.friends.Friend;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 
@@ -15,9 +16,11 @@ public class User {
     private String email;
     private String provider;
     //private String imageURL;
-    private ArrayList<String> storedTournamentsID;
-    private ArrayList<String> storedPlayers;
+    private ArrayList<String> storedTripsID;
+    private ArrayList<Friend> storedFriends;
+    private ArrayList<Friend> storedFavFriends;
     private String u_key;
+
 
     public User() {
         this.u_ID = "";
@@ -27,24 +30,25 @@ public class User {
         this.email ="";
         this.provider="";
         //this.imageURL="";
-        this.storedTournamentsID = new ArrayList<>();
-        this.storedPlayers = new ArrayList<>();
+        this.storedTripsID = new ArrayList<>();
+        this.storedFriends = new ArrayList<>();
+        this.storedFavFriends = new ArrayList<>();
     }
 
-    public ArrayList<String> getStoredPlayers() {
-        return storedPlayers;
+    public ArrayList<Friend> getStoredFriends() {
+        return storedFriends;
     }
 
-    public void setStoredPlayers(ArrayList<String> storedPlayers) {
-        this.storedPlayers = storedPlayers;
+    public void setStoredFriends(ArrayList<Friend> storedFriendsID) {
+        this.storedFriends = storedFriends;
     }
 
-    public ArrayList<String> getStoredTournamentsID() {
-        return storedTournamentsID;
+    public ArrayList<String> getStoredTripsID() {
+        return storedTripsID;
     }
 
-    public void setStoredTournamentsID(ArrayList<String> storedTournamentsID) {
-        this.storedTournamentsID = storedTournamentsID;
+    public void setStoredTripsID(ArrayList<String> storedTripsID) {
+        this.storedTripsID = storedTripsID;
     }
 
     public String getProvider() {
@@ -98,5 +102,13 @@ public class User {
 
     public String getU_key() {
         return u_key;
+    }
+
+    public ArrayList<Friend> getStoredFavFriends() {
+        return storedFavFriends;
+    }
+
+    public void setStoredFavFriends(ArrayList<Friend> storedFavFriends) {
+        this.storedFavFriends = storedFavFriends;
     }
 }

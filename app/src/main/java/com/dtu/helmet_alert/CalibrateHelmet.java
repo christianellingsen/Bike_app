@@ -52,7 +52,7 @@ public class CalibrateHelmet extends Fragment{
 
 
         connect_b = (Button) root.findViewById(R.id.calibrate_helmet_connectButton);
-        helmetImage = (ImageView) root.findViewById(R.id.calibrate_helmet_image);
+        helmetImage = (ImageView) root.findViewById(R.id.calibrate_helmet_helmet);
         arrow_ccw = (ImageView) root.findViewById(R.id.calibrate_helmet_arrow_ccw);
         arrow_cw = (ImageView) root.findViewById(R.id.calibrate_helmet_arrow_cw);
         crossCheck = (ImageView) root.findViewById(R.id.calibrate_helmet_checkCross);

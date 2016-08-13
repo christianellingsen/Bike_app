@@ -252,10 +252,6 @@ public class Login extends AppCompatActivity  {
 
                         SharedPreferences prefs = getSharedPreferences("com.dtu.tournamate_v1", Context.MODE_PRIVATE);
                         prefs.edit().putString("uID",user.getU_ID()).apply();
-                        prefs.edit().putString("firstName", user.getFirstName()).apply();
-                        prefs.edit().putString("lastName", user.getLastName()).apply();
-                        prefs.edit().putString("email", user.getEmail()).apply();
-                        prefs.edit().putStringSet("tournaments", new HashSet<String>(user.getStoredTournamentsID())).apply();
                         prefs.edit().commit();
 
                     }

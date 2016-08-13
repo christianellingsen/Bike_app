@@ -28,6 +28,8 @@ public class BikeRide {
     private ArrayList<String> violationTimeStamp;
     private ArrayList<String> violationType;
 
+    private String bikeRide_ID;
+
     public BikeRide() {
 
         this.totalDistanceKM = 0.0;
@@ -43,6 +45,8 @@ public class BikeRide {
 
         violationTimeStamp = new ArrayList<>();
         violationType = new ArrayList<>();
+
+        this.bikeRide_ID = "";
 
         //Log.d("Distance","Trip init. Distance: " + totalDistanceKM+ " and speed: " +averageSpeed);
 

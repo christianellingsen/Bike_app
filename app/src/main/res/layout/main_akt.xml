@@ -5,14 +5,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    tools:context="com.dtu.susie_app.Main_akt">
+    android:fitsSystemWindows="true">
 
     <ImageView
         android:layout_width="200dp"
         android:layout_height="200dp"
         android:id="@+id/helmetImage"
-        android:src="@drawable/bike_helmet"
+        android:src="@drawable/helmet"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true" />
 

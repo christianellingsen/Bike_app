@@ -179,6 +179,10 @@ public class SignUp extends AppCompatActivity {
                     user.setU_key(key);
                     mDatabase.child(MyApplication.usersString).child(key).setValue(user);
 
+                    SharedPreferences prefs = getSharedPreferences("com.dtu.tournamate_v1", Context.MODE_PRIVATE);
+                    prefs.edit().putString("uID",user.getU_key()).apply();
+                    prefs.edit().commit();
+
 
                     startActivity(new Intent(getBaseContext(), MainActivity.class));
 
@@ -315,7 +319,7 @@ public class SignUp extends AppCompatActivity {
                                 user.setEmail(email);
                                 user.setU_ID(authData.getUid());
                                 user.setProvider(authData.getProvider());
-                                //user.setStoredTournamentsID(new HashSet<String>());
+                                //user.setStoredTripsID(new HashSet<String>());
                                 MyApplication.setUser(user);
                                 ref.child("users").child(authData.getUid()).setValue(user);
 

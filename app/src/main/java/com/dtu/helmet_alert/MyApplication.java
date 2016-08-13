@@ -6,8 +6,14 @@ import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.firebase.client.Firebase;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 /**
  * Created by ce on 31-03-2016.
@@ -27,6 +33,7 @@ public class MyApplication extends android.app.Application {
     public static final String firebase_URL = "https://helmet-alert.firebaseio.com/V1/";
     public static String newBikeRideKey = "";
     public static String usersString = "users";
+    private static DatabaseReference mDatabase;
 
     // Bluetooth
     public static String helmetAddress = "";
@@ -84,9 +91,47 @@ public class MyApplication extends android.app.Application {
         Log.d("Stored device", "Bike address: "+bikeAddress);
 
 
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        FirebaseUser user = mAuth.getCurrentUser();
+
+        if(user!=null){
+
+            final String uID =  user.getUid();
+            Log.d("MyApplication on start","Shared prefs uID:" + uID);
+
+            mDatabase = FirebaseDatabase.getInstance().getReference();
+            Query query = mDatabase.child("users").orderByChild("u_ID");
+
+            query.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    for (DataSnapshot child : dataSnapshot.getChildren()) {
+                        User u = child.getValue(User.class);
+                        Log.d("MyApplication on start","Found user!");
+                        if (uID.equals(u.getU_ID()))
+                            Log.d("MyApplication on start","Found RIGHT user!");
+                            MyApplication.setUser(u);
+                    }
+                }
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
+            Log.d("On MyApplication start","Logged in as " + MyApplication.getUser().getFullName());
+        }
+
+
+
+
     }
 
     public static void setUser(User user) {
         MyApplication.user = user;
+    }
+
+    public static User getUser() {
+        return user;
     }
 }

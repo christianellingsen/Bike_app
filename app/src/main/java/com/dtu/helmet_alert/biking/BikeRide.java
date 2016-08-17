@@ -1,4 +1,4 @@
-package com.dtu.helmet_alert;
+package com.dtu.helmet_alert.biking;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -29,6 +29,7 @@ public class BikeRide {
     private ArrayList<String> violationType;
 
     private String bikeRide_ID;
+    private String userID;
 
     public BikeRide() {
 
@@ -38,7 +39,7 @@ public class BikeRide {
         this.duration = 0;
         this.averageSpeed = 0.0;
         this.speedHistory = new ArrayList<>();
-        this.woreHelmetCorrect = false;
+        this.woreHelmetCorrect = true;
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
         this.date = dateFormat.format(new Date());
         this.durationString = "";
@@ -47,12 +48,27 @@ public class BikeRide {
         violationType = new ArrayList<>();
 
         this.bikeRide_ID = "";
+        this.userID = "";
 
         //Log.d("Distance","Trip init. Distance: " + totalDistanceKM+ " and speed: " +averageSpeed);
 
     }
 
+    public String getBikeRide_ID() {
+        return bikeRide_ID;
+    }
 
+    public void setBikeRide_ID(String bikeRide_ID) {
+        this.bikeRide_ID = bikeRide_ID;
+    }
+
+    public String getUserID() {
+        return userID;
+    }
+
+    public void setUserID(String userID) {
+        this.userID = userID;
+    }
 
     public String getDate() {
         return date;
@@ -74,7 +90,7 @@ public class BikeRide {
     public long getStartTime() {
         return startTime;
     }
-
+    @JsonIgnore
     public void setStartTime(long startTime) {
         this.startTime = startTime;
     }
@@ -83,7 +99,7 @@ public class BikeRide {
     public long getEndTime() {
         return endTime;
     }
-
+    @JsonIgnore
     public void setEndTime(long endTime) {
         this.endTime = endTime;
     }
@@ -106,7 +122,7 @@ public class BikeRide {
     public void setDurationString(String duration){
         this.durationString = duration;
     }
-
+    @JsonIgnore
     public void setDuration(long duration) {
         this.duration = duration;
     }

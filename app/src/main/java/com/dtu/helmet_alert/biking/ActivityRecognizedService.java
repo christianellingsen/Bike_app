@@ -1,14 +1,18 @@
-package com.dtu.helmet_alert;
+package com.dtu.helmet_alert.biking;
 
 import android.app.IntentService;
 import android.content.Intent;
-import android.support.v4.app.NotificationManagerCompat;
-import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
+import com.dtu.helmet_alert.MyApplication;
+import com.dtu.helmet_alert.OLD_BluetoothService;
+import com.dtu.helmet_alert.biking.BikeRide;
+import com.dtu.helmet_alert.bluetooth.HelmetServiceBT;
 import com.firebase.client.Firebase;
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -32,6 +36,9 @@ public class ActivityRecognizedService extends IntentService {
     Firebase bikeRideRef = ref.child("bikeRides");
     Firebase newBikeRideRef;
 
+    //Firebase Google update
+    DatabaseReference mDatabase;
+
 
     @Override
     public void onCreate() {
@@ -45,6 +52,8 @@ public class ActivityRecognizedService extends IntentService {
         Firebase ref = new Firebase(MyApplication.firebase_URL);
         Firebase logRef = ref.child("log").child("ActivityRecognizeCalled");
         logRef.setValue(date);
+
+        mDatabase = FirebaseDatabase.getInstance().getReference();
 
         Log.d("ActivityRecog", "ActivityService called");
 
@@ -75,21 +84,23 @@ public class ActivityRecognizedService extends IntentService {
                 }
                 case DetectedActivity.ON_BICYCLE: {
                     if( activity.getConfidence() >= 75 ) {
-                        Log.e( "ActivityRecogition", "On Bicycle: " + activity.getConfidence() );
-                        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+                        Log.d( "ActivityRecogition", "On Bicycle: " + activity.getConfidence() );
+                        /**NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
                         builder.setContentText( "Are you bicycling?" );
                         builder.setSmallIcon(R.mipmap.ic_launcher);
                         builder.setContentTitle(getString(R.string.app_name));
                         NotificationManagerCompat.from(this).notify(0, builder.build());
+                         **/
+
+
                         MyApplication.standStillCounter = 0;
                         MyApplication.ridingBike = true;
 
                         if (!MyApplication.bleServiceStarted) {
 
-                            newBikeRideRef = bikeRideRef.push();
-                            MyApplication.bikeRide = new BikeRide();
-                            MyApplication.newBikeRideKey = newBikeRideRef.getKey();
-                            startService(new Intent(getBaseContext(), BluetoothService.class));
+                            startService(new Intent(getBaseContext(), MonitorBikeRide.class));
+
+
                             MyApplication.bleServiceStarted = true;
 
 
@@ -123,7 +134,7 @@ public class ActivityRecognizedService extends IntentService {
                         builder.setSmallIcon( R.mipmap.ic_launcher );
                         builder.setContentTitle( getString( R.string.app_name ) );
                         NotificationManagerCompat.from(this).notify(0, builder.build());
-**/
+                        **/
                         if (MyApplication.standStillCounter<10) {
                             Log.d("ActivityRecog","standStillCounter: "+MyApplication.standStillCounter);
                             MyApplication.standStillCounter++;
@@ -131,15 +142,15 @@ public class ActivityRecognizedService extends IntentService {
 
                     if (MyApplication.standStillCounter>10){
                         Log.d("ActivityRec", "Stand still counter > 10");
-                        stopService(new Intent(getBaseContext(), BluetoothService.class));
-                        MyApplication.bikeRide.setEndTime(System.currentTimeMillis());
-                        newBikeRideRef.setValue(MyApplication.bikeRide);
+                        stopService(new Intent(getBaseContext(), MonitorBikeRide.class));
 
-                        NotificationCompat.Builder builder2 = new NotificationCompat.Builder(this);
+
+                        /**NotificationCompat.Builder builder2 = new NotificationCompat.Builder(this);
                          builder2.setContentText( "Done biking?" );
                          builder2.setSmallIcon(R.mipmap.ic_launcher);
                          builder2.setContentTitle(getString(R.string.app_name));
                          NotificationManagerCompat.from(this).notify(0, builder2.build());
+                        **/
 
                         MyApplication.ridingBike = false;
 
@@ -163,30 +174,8 @@ public class ActivityRecognizedService extends IntentService {
                 case DetectedActivity.WALKING: {
                     Log.e( "ActivityRecogition", "Walking: " + activity.getConfidence() );
                     if( activity.getConfidence() >= 75 ) {
-                        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
-                        builder.setContentText( "Are you walking?" );
-                        builder.setSmallIcon( R.mipmap.ic_launcher );
-                        builder.setContentTitle( getString( R.string.app_name ) );
-                        NotificationManagerCompat.from(this).notify(0, builder.build());
 
 
-                        if (!MyApplication.bleServiceStarted) {
-
-                            newBikeRideRef = bikeRideRef.push();
-                            MyApplication.bikeRide = new BikeRide();
-                            MyApplication.newBikeRideKey = newBikeRideRef.getKey();
-                            startService(new Intent(getBaseContext(), BluetoothService.class));
-                            MyApplication.bleServiceStarted = true;
-
-
-                            // Firebase log
-                            SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-                            String date  = dateFormat.format(new Date());
-
-                            Firebase ref = new Firebase(MyApplication.firebase_URL);
-                            Firebase logRef = ref.child("log").child("WalkingStart");
-                            logRef.setValue(date);
-                        }
                     }
                     break;
                 }

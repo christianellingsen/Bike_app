@@ -27,6 +27,8 @@ import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.Toast;
 
+import com.dtu.helmet_alert.biking.ActivityRecognizedService;
+import com.dtu.helmet_alert.biking.BikeRide;
 import com.firebase.client.Firebase;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -39,7 +41,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class ConnectToBT extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class PairDevices extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private static final int REQUEST_SELECT_DEVICE = 1;
     private static final int REQUEST_ENABLE_BT = 2;
@@ -73,7 +75,7 @@ public class ConnectToBT extends AppCompatActivity implements GoogleApiClient.Co
     // TEST STUFF:
 
     Button test_b;
-    BluetoothService customBTService = new BluetoothService();
+    OLD_BluetoothService customBTService = new OLD_BluetoothService();
     Firebase ref = new Firebase(MyApplication.firebase_URL);
     Firebase bikeRideRef = ref.child("bikeRides");
     Firebase newBikeRideRef;
@@ -131,12 +133,12 @@ public class ConnectToBT extends AppCompatActivity implements GoogleApiClient.Co
                     newBikeRideRef = bikeRideRef.push();
                     MyApplication.bikeRide = new BikeRide();
                     MyApplication.newBikeRideKey = newBikeRideRef.getKey();
-                    startService(new Intent(getBaseContext(), BluetoothService.class));
+                    startService(new Intent(getBaseContext(), OLD_BluetoothService.class));
                     test_b.setText("Stop");
                 }
                 else if (test_b.getText().equals("Stop")) {
                     MyApplication.ridingBike = false;
-                    stopService(new Intent(getBaseContext(), BluetoothService.class));
+                    stopService(new Intent(getBaseContext(), OLD_BluetoothService.class));
                     test_b.setText("Start");
                     MyApplication.bikeRide.setEndTime(System.currentTimeMillis());
                     newBikeRideRef.setValue(MyApplication.bikeRide);
@@ -173,7 +175,7 @@ public class ConnectToBT extends AppCompatActivity implements GoogleApiClient.Co
 
                         //Connect button pressed, open DeviceListActivity class, with popup windows that scan for devices
 
-                        Intent newIntent = new Intent(ConnectToBT.this, DeviceListActivity.class);
+                        Intent newIntent = new Intent(PairDevices.this, DeviceListActivity.class);
                         startActivityForResult(newIntent, REQUEST_SELECT_DEVICE);
                     } else {
                         //Disconnect button pressed
@@ -202,7 +204,7 @@ public class ConnectToBT extends AppCompatActivity implements GoogleApiClient.Co
                     if (connect_bike_b.getText().equals("Connect")) {
                         //Connect button pressed, open DeviceListActivity class, with popup windows that scan for devices
 
-                        Intent newIntent = new Intent(ConnectToBT.this, DeviceListActivity.class);
+                        Intent newIntent = new Intent(PairDevices.this, DeviceListActivity.class);
                         startActivityForResult(newIntent, REQUEST_SELECT_DEVICE);
                     } else {
                         //Disconnect button pressed
@@ -299,35 +301,33 @@ public class ConnectToBT extends AppCompatActivity implements GoogleApiClient.Co
                     if (temp_device.getName().equals("HelmetAlert_H")){
                         mHelmetDevice = temp_device;
 
-                        //MyApplication.helmetConnect = true;
-
-                        //Log.d(TAG, "... onActivityResultdevice.address==" + mHelmetDevice + "mserviceValue" + mUARTServiceHelmet);
-                        //((TextView) findViewById(R.id.deviceName)).setText(mHelmetDevice.getName()+ " - connecting");
-                        //mUARTServiceHelmet.connect(deviceAddress);
-
-
-                        // Store address of device
+                        // Store name nad address of device
 
                         SharedPreferences prefs = getSharedPreferences("com.dtu.susie_bike_app", Context.MODE_PRIVATE);
-                        MyApplication.helmetAddress = deviceAddress;
-                        prefs.edit().putString(MyApplication.prefsHelmetAddress,MyApplication.helmetAddress).commit();
+                        MyApplication.HELMET_DEVICE_ADDRESS = deviceAddress;
+                        MyApplication.HELMET_DEVICE_NAME = temp_device.getName();
+
+                        prefs.edit().putString(MyApplication.prefsHelmetAddress,MyApplication.HELMET_DEVICE_ADDRESS).apply();
+                        prefs.edit().putString(MyApplication.prefsHelmetName,MyApplication.HELMET_DEVICE_NAME).apply();
+                        prefs.edit().putBoolean(MyApplication.prefsHelmetPaired,true).apply();
+                        prefs.edit().commit();
 
                     }
                     else if (temp_device.getName().equals("HelmetAlert_B")){
                         mBikeDevice = temp_device;
 
-                        //MyApplication.bikeConnect = true;
-
-                        //Log.d(TAG, "... onActivityResultdevice.address==" + mBikeDevice + "mserviceValue" + mUARTServiceBike);
-                        //((TextView) findViewById(R.id.deviceName)).setText(mHelmetDevice.getName()+ " - connecting");
-                        //mUARTServiceBike.connect(deviceAddress);
-
-
-                        // Store address of device
+                        // Store name and address of device
 
                         SharedPreferences prefs = getSharedPreferences("com.dtu.susie_bike_app", Context.MODE_PRIVATE);
-                        MyApplication.bikeAddress = deviceAddress;
-                        prefs.edit().putString(MyApplication.prefsBikeAddress,MyApplication.bikeAddress).commit();
+                        MyApplication.BIKE_DEVICE_ADDRESS = deviceAddress;
+                        MyApplication.BIKE_DEVICE_NAME = temp_device.getName();
+
+                        prefs.edit().putString(MyApplication.prefsBikeAddress,MyApplication.BIKE_DEVICE_ADDRESS).apply();
+                        prefs.edit().putString(MyApplication.prefsBikeName,MyApplication.BIKE_DEVICE_NAME).apply();
+                        prefs.edit().putBoolean(MyApplication.prefsBikePaired,true).apply();
+                        prefs.edit().commit();
+
+
                     }
 
                     updateConnImages();
@@ -382,15 +382,6 @@ public class ConnectToBT extends AppCompatActivity implements GoogleApiClient.Co
         }
     }
 
-    public void checkHelmet(String text){
-
-        if (text.equals("UP")){
-            helmetImage.setRotation(0);
-        }
-        else if (text.equals("DOWN")){
-            helmetImage.setRotation(-180);
-        }
-    }
 
     /**
      *
@@ -446,13 +437,13 @@ public class ConnectToBT extends AppCompatActivity implements GoogleApiClient.Co
             bikeImage.setImageResource(R.drawable.bike_check_bw);
         }
         **/
-        if (MyApplication.helmetAddress.length()>1){
+        if (MyApplication.HELMET_DEVICE_ADDRESS.length()>1){
             helmetImage.setImageResource(R.drawable.bike_helmet_check);
         }
         else{
             helmetImage.setImageResource(R.drawable.helmet_bw);
         }
-        if (MyApplication.bikeAddress.length()>1){
+        if (MyApplication.BIKE_DEVICE_ADDRESS.length()>1){
             bikeImage.setImageResource(R.drawable.bike_check);
         }
         else {

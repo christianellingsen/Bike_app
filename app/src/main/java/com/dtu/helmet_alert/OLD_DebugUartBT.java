@@ -34,6 +34,7 @@ import android.widget.Toast;
 
 //import com.google.android.gms.appindexing.Action;
 //import com.google.android.gms.appindexing.AppIndex;
+import com.dtu.helmet_alert.biking.ActivityRecognizedService;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.ActivityRecognition;
@@ -53,7 +54,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class DebugUartBT extends AppCompatActivity implements View.OnClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class OLD_DebugUartBT extends AppCompatActivity implements View.OnClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private static final int REQUEST_SELECT_DEVICE = 1;
     private static final int REQUEST_ENABLE_BT = 2;
@@ -64,7 +65,7 @@ public class DebugUartBT extends AppCompatActivity implements View.OnClickListen
     private static final int STATE_OFF = 10;
 
     private int mState = UART_PROFILE_DISCONNECTED;
-    private UartService mService = null;
+    private OLD_UartService mService = null;
     private BluetoothDevice mDevice = null;
     private BluetoothAdapter mBtAdapter = null;
 
@@ -147,7 +148,7 @@ public class DebugUartBT extends AppCompatActivity implements View.OnClickListen
 
                         //Connect button pressed, open DeviceListActivity class, with popup windows that scan for devices
 
-                        Intent newIntent = new Intent(DebugUartBT.this, DeviceListActivity.class);
+                        Intent newIntent = new Intent(OLD_DebugUartBT.this, DeviceListActivity.class);
                         startActivityForResult(newIntent, REQUEST_SELECT_DEVICE);
                     } else {
                         //Disconnect button pressed
@@ -251,7 +252,7 @@ public class DebugUartBT extends AppCompatActivity implements View.OnClickListen
 
             @Override
             protected void onPostExecute(Object result) {
-                Toast.makeText(DebugUartBT.this, "Done!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(OLD_DebugUartBT.this, "Done!", Toast.LENGTH_SHORT).show();
                 Log.d("Http post", "Posted to field3: " + g + " and field2: " + batt);
             }
         }.execute(10);
@@ -272,7 +273,7 @@ public class DebugUartBT extends AppCompatActivity implements View.OnClickListen
     //UART service connected/disconnected
     private ServiceConnection mServiceConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder rawBinder) {
-            mService = ((UartService.LocalBinder) rawBinder).getService();
+            mService = ((OLD_UartService.LocalBinder) rawBinder).getService();
             Log.d(TAG, "onServiceConnected mService= " + mService);
             if (!mService.initialize()) {
                 Log.e(TAG, "Unable to initialize Bluetooth");
@@ -303,7 +304,7 @@ public class DebugUartBT extends AppCompatActivity implements View.OnClickListen
 
             final Intent mIntent = intent;
             //*********************//
-            if (action.equals(UartService.ACTION_GATT_CONNECTED)) {
+            if (action.equals(OLD_UartService.ACTION_GATT_CONNECTED)) {
                 runOnUiThread(new Runnable() {
                     public void run() {
                         String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
@@ -320,7 +321,7 @@ public class DebugUartBT extends AppCompatActivity implements View.OnClickListen
             }
 
             //*********************//
-            if (action.equals(UartService.ACTION_GATT_DISCONNECTED)) {
+            if (action.equals(OLD_UartService.ACTION_GATT_DISCONNECTED)) {
                 runOnUiThread(new Runnable() {
                     public void run() {
                         String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
@@ -340,7 +341,7 @@ public class DebugUartBT extends AppCompatActivity implements View.OnClickListen
 
 
             //*********************//
-            if (action.equals(UartService.ACTION_GATT_SERVICES_DISCOVERED)) {
+            if (action.equals(OLD_UartService.ACTION_GATT_SERVICES_DISCOVERED)) {
                 mService.enableTXNotification();
             }
             //*********************//
@@ -362,9 +363,9 @@ public class DebugUartBT extends AppCompatActivity implements View.OnClickListen
              }
              });
              }**/
-            if (action.equals(UartService.ACTION_DATA_AVAILABLE)) {
+            if (action.equals(OLD_UartService.ACTION_DATA_AVAILABLE)) {
 
-                final byte[] txValue = intent.getByteArrayExtra(UartService.EXTRA_DATA);
+                final byte[] txValue = intent.getByteArrayExtra(OLD_UartService.EXTRA_DATA);
                 runOnUiThread(new Runnable() {
                     public void run() {
                         try {
@@ -384,7 +385,7 @@ public class DebugUartBT extends AppCompatActivity implements View.OnClickListen
                 });
             }
             //*********************//
-            if (action.equals(UartService.DEVICE_DOES_NOT_SUPPORT_UART)) {
+            if (action.equals(OLD_UartService.DEVICE_DOES_NOT_SUPPORT_UART)) {
                 showMessage("Device doesn't support UART. Disconnecting");
                 mService.disconnect();
             }
@@ -394,7 +395,7 @@ public class DebugUartBT extends AppCompatActivity implements View.OnClickListen
     };
 
     private void service_init() {
-        Intent bindIntent = new Intent(this, UartService.class);
+        Intent bindIntent = new Intent(this, OLD_UartService.class);
         bindService(bindIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
 
         LocalBroadcastManager.getInstance(this).registerReceiver(UARTStatusChangeReceiver, makeGattUpdateIntentFilter());
@@ -402,11 +403,11 @@ public class DebugUartBT extends AppCompatActivity implements View.OnClickListen
 
     private static IntentFilter makeGattUpdateIntentFilter() {
         final IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(UartService.ACTION_GATT_CONNECTED);
-        intentFilter.addAction(UartService.ACTION_GATT_DISCONNECTED);
-        intentFilter.addAction(UartService.ACTION_GATT_SERVICES_DISCOVERED);
-        intentFilter.addAction(UartService.ACTION_DATA_AVAILABLE);
-        intentFilter.addAction(UartService.DEVICE_DOES_NOT_SUPPORT_UART);
+        intentFilter.addAction(OLD_UartService.ACTION_GATT_CONNECTED);
+        intentFilter.addAction(OLD_UartService.ACTION_GATT_DISCONNECTED);
+        intentFilter.addAction(OLD_UartService.ACTION_GATT_SERVICES_DISCOVERED);
+        intentFilter.addAction(OLD_UartService.ACTION_DATA_AVAILABLE);
+        intentFilter.addAction(OLD_UartService.DEVICE_DOES_NOT_SUPPORT_UART);
         return intentFilter;
     }
 

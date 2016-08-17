@@ -57,12 +57,26 @@
                 android:layout_alignParentEnd="true"
                 android:layout_below="@+id/found_tournament_list_name">
 
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Add friend"
-                    android:id="@+id/add_friend"
-                    android:onClick="onAddFriendClick"/>
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+                    <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Add friend"
+                        android:id="@+id/add_friend" />
+
+                    <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Favorite"
+                        android:id="@+id/add_friend_toFav"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentEnd="true"
+                        android:visibility="gone"/>
+                </RelativeLayout>
+
+
 
             </LinearLayout>
         </RelativeLayout>

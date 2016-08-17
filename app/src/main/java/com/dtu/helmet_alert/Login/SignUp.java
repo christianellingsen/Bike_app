@@ -21,7 +21,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.dtu.helmet_alert.DebugUartBT;
+import com.dtu.helmet_alert.OLD_DebugUartBT;
 import com.dtu.helmet_alert.MainActivity;
 import com.dtu.helmet_alert.MyApplication;
 import com.dtu.helmet_alert.R;
@@ -179,8 +179,9 @@ public class SignUp extends AppCompatActivity {
                     user.setU_key(key);
                     mDatabase.child(MyApplication.usersString).child(key).setValue(user);
 
-                    SharedPreferences prefs = getSharedPreferences("com.dtu.tournamate_v1", Context.MODE_PRIVATE);
+                    SharedPreferences prefs = getSharedPreferences("com.dtu.susie_bike_app", Context.MODE_PRIVATE);
                     prefs.edit().putString("uID",user.getU_key()).apply();
+                    prefs.edit().putString("uName",user.getFullName()).apply();
                     prefs.edit().commit();
 
 
@@ -332,7 +333,7 @@ public class SignUp extends AppCompatActivity {
                                 prefs.edit().commit();
 
                                 Log.d("Sign up", "Sign up success!");
-                                startActivity(new Intent(getBaseContext(), DebugUartBT.class));
+                                startActivity(new Intent(getBaseContext(), OLD_DebugUartBT.class));
 
                             }
 

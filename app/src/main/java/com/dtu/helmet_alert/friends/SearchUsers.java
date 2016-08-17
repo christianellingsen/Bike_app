@@ -50,7 +50,6 @@ public class SearchUsers extends Fragment {
 
         root = i.inflate(R.layout.search_users, container, false);
 
-        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle("Search");
 
         searchView = (SearchView) root.findViewById(R.id.search_tournament_field);
 

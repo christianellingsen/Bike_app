@@ -1,16 +1,16 @@
 package com.dtu.helmet_alert;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +20,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import com.dtu.helmet_alert.bluetooth.HelmetServiceBT;
 
 /**
  * Created by ce on 22-07-2016.
@@ -35,12 +37,14 @@ public class CalibrateHelmet extends Fragment{
     private BluetoothDevice mHelmetDevice = null;
     private BluetoothAdapter mBtAdapter = null;
 
-    private BluetoothService mCustomBTService;
+    private OLD_BluetoothService mCustomBTService;
 
     private static final int REQUEST_SELECT_DEVICE = 1;
     private static final int REQUEST_ENABLE_BT = 2;
 
-    private float acc_x = 0;
+    private boolean mScanning;
+
+    private double acc_x = 0;
 
     View root;
 
@@ -67,7 +71,7 @@ public class CalibrateHelmet extends Fragment{
         arrow_ccw.setVisibility(View.INVISIBLE);
         
 
-        mCustomBTService = new BluetoothService();
+        mCustomBTService = new OLD_BluetoothService();
 
         connect_b.setText("Connect to helmet");
 
@@ -75,9 +79,9 @@ public class CalibrateHelmet extends Fragment{
         connect_b.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.i(TAG, "onClick- helmet");
+                Log.d(TAG, "onClick- helmet");
                 if (!mBtAdapter.isEnabled()) {
-                    Log.i(TAG, "onClick - BT not enabled yet");
+                    Log.d(TAG, "onClick - BT not enabled yet");
                     Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                     startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
                 } else {
@@ -89,21 +93,29 @@ public class CalibrateHelmet extends Fragment{
                         startActivityForResult(newIntent, REQUEST_SELECT_DEVICE);
                     } else {
                         //Disconnect button pressed
-                        if (mHelmetDevice != null) {
-                            //mUARTServiceHelmet.disconnect();
-                            //MyApplication.helmetConnect =false;
+                        getActivity().stopService(new Intent(getActivity().getBaseContext(), HelmetServiceBT.class));
+                        helmetImage.setImageResource(R.drawable.helmet_side_bw);
+                        arrow_cw.setVisibility(View.INVISIBLE);
+                        arrow_ccw.setVisibility(View.INVISIBLE);
+                        connect_b.setText("Connect to helmet");
+                        crossCheck.setImageDrawable(getActivity().getDrawable(R.drawable.cross));
 
-
-                        }
                     }
                 }
 
             }
         });
 
+        // Broadcast reciever
+        getActivity().registerReceiver(accDataUpdateReceiver, accDataUpdateIntentFilter());
+
+
 
         // BT
-        mBtAdapter = BluetoothAdapter.getDefaultAdapter();
+         // BluetoothAdapter through BluetoothManager.
+        final BluetoothManager bluetoothManager =
+                (BluetoothManager) getActivity().getSystemService(Context.BLUETOOTH_SERVICE);
+        mBtAdapter = bluetoothManager.getAdapter();
         if (mBtAdapter == null) {
             Toast.makeText(getActivity(), "Bluetooth is not available", Toast.LENGTH_LONG).show();
         }
@@ -131,7 +143,16 @@ public class CalibrateHelmet extends Fragment{
                         prefs.edit().putString(MyApplication.prefsHelmetAddress,MyApplication.helmetAddress).commit();
                         updateImages();
                         connect_b.setText("Disconnect");
-                        getActivity().startService(new Intent(getContext(), BluetoothService.class));
+
+                        Log.d(TAG,"Connecting to: " + mHelmetDevice.getName()+" with address: "+mHelmetDevice.getAddress());
+
+                        final Intent intent = new Intent(getContext(), HelmetServiceBT.class);
+                        intent.putExtra(HelmetServiceBT.EXTRAS_DEVICE_NAME, mHelmetDevice.getName());
+                        intent.putExtra(HelmetServiceBT.EXTRAS_DEVICE_ADDRESS, mHelmetDevice.getAddress());
+                        intent.putExtra(HelmetServiceBT.EXTRAS_STATE,MyApplication.STATE_CALIBRATE);
+                        getActivity().startService(intent);
+
+                        //getActivity().startService(new Intent(getContext(), OLD_BluetoothService.class));
 
                     }
                     else {
@@ -177,18 +198,22 @@ public class CalibrateHelmet extends Fragment{
         double degrees = Math.toDegrees(radians);
         helmetImage.setRotation((float)(90-degrees));
 
+        //Log.d(TAG,"new acc_x value: "+acc_x);
+
         if (acc_x<-0.17){
-            arrow_ccw.setVisibility(View.VISIBLE);
-            arrow_cw.setVisibility(View.INVISIBLE);
+            //Log.d(TAG,"For langt fremme. tip op");
+            arrow_ccw.setVisibility(View.INVISIBLE);
+            arrow_cw.setVisibility(View.VISIBLE);
             crossCheck.setImageDrawable(getActivity().getDrawable(R.drawable.cross));
         }
         if (acc_x>0.17){
-            arrow_cw.setVisibility(View.VISIBLE);
-            arrow_ccw.setVisibility(View.INVISIBLE);
+            //Log.d(TAG,"For langt tilbage. tip frem");
+            arrow_cw.setVisibility(View.INVISIBLE);
+            arrow_ccw.setVisibility(View.VISIBLE);
             crossCheck.setImageDrawable(getActivity().getDrawable(R.drawable.cross));
         }
 
-        if (acc_x<0.17 || acc_x>-0.17){
+        if (acc_x<0.17 && acc_x>-0.17){
             arrow_ccw.setVisibility(View.INVISIBLE);
             arrow_ccw.setVisibility(View.INVISIBLE);
             crossCheck.setImageDrawable(getActivity().getDrawable(R.drawable.check));
@@ -199,6 +224,31 @@ public class CalibrateHelmet extends Fragment{
     @Override
     public void onDestroyView() {
         super.onDestroy();
-        getActivity().stopService(new Intent(getActivity().getBaseContext(), BluetoothService.class));
+        getActivity().stopService(new Intent(getActivity().getBaseContext(), OLD_BluetoothService.class));
+        getActivity().unregisterReceiver(accDataUpdateReceiver);
     }
+
+    private static IntentFilter accDataUpdateIntentFilter() {
+        final IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(HelmetServiceBT.NEW_ACC_DATA);
+        return intentFilter;
+    }
+
+    private final BroadcastReceiver accDataUpdateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (HelmetServiceBT.NEW_ACC_DATA.equals(action)) {
+
+                //update acc_x value
+                acc_x = intent.getDoubleExtra(HelmetServiceBT.ACC_X_DATA_VALUE,0);
+
+                acc_x=acc_x*-1.0;
+                // update UI
+                updateImages();
+
+            }
+
+        }
+    };
 }

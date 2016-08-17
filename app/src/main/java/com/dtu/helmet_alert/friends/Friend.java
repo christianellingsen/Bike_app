@@ -13,6 +13,7 @@ public class Friend {
         private String email;
         //private String imageURL;
         private String u_key;
+        private boolean isFavorite;
 
 
         public Friend() {
@@ -49,7 +50,6 @@ public class Friend {
             this.email = email;
         }
 
-        @JsonIgnore
         public String getFullName(){
             return this.firstName + " " + this.lastName;
         }

@@ -1,6 +1,7 @@
 package com.dtu.helmet_alert.friends;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,36 +49,40 @@ public class FoundUsersAdapter extends RecyclerView.Adapter<FoundUsersAdapter.Vi
     public void onBindViewHolder(final ViewHolder viewHolder, int position) {
 
         final int pos = position;
-        final User t = tList.get(pos);
-        viewHolder.tName.setText(t.getFullName());
+        final User user = tList.get(pos);
+        viewHolder.tName.setText(user.getFullName());
 
         final Friend f = new Friend();
-        f.setEmail(t.getEmail());
-        f.setFirstName(t.getFirstName());
-        f.setLastName(t.getLastName());
-        f.setU_key(t.getU_key());
+        f.setEmail(user.getEmail());
+        f.setFirstName(user.getFirstName());
+        f.setLastName(user.getLastName());
+        f.setU_key(user.getU_key());
+
+
+        viewHolder.addFriend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("Add friends","clicked on "+f.getFirstName());
+                MyApplication.getUser().getStoredFriends().add(f);
+                // Update list of friends in database
+                mDatabase.child("users").child(MyApplication.getUser().getU_key()).setValue(MyApplication.getUser());
+
+                viewHolder.addFriend.setText("Already added");
+                viewHolder.addFriend.setClickable(false);
+                viewHolder.addFriend.setEnabled(false);
+
+            }
+        });
 
         for (Friend friend : MyApplication.getUser().getStoredFriends()) {
             if (friend.getU_key().equals(f.getU_key())) {
                 viewHolder.addFriend.setText("Already added");
                 viewHolder.addFriend.setClickable(false);
                 viewHolder.addFriend.setEnabled(false);
-            } else {
-                viewHolder.addFriend.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        MyApplication.getUser().getStoredFriends().add(f);
-                        // Update list of friends in database
-                        mDatabase.child("users").child(MyApplication.getUser().getU_key()).setValue(MyApplication.getUser());
-
-                        viewHolder.addFriend.setText("Already added");
-                        viewHolder.addFriend.setClickable(false);
-                        viewHolder.addFriend.setEnabled(false);
-
-                    }
-                });
             }
         }
+
+
 
 
 /**

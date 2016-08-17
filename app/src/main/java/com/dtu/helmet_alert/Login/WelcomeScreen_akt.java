@@ -59,6 +59,7 @@ public class WelcomeScreen_akt extends AppCompatActivity implements View.OnClick
         FirebaseUser user = mAuth.getCurrentUser();
         if ( user != null) {
             Log.d("welcome screen","Already logged in");
+
             startActivity(new Intent(getBaseContext(), MainActivity.class));
         }
 

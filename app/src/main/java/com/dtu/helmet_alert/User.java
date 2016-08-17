@@ -2,6 +2,7 @@ package com.dtu.helmet_alert;
 
 
 import com.dtu.helmet_alert.friends.Friend;
+import com.dtu.helmet_alert.friends.Notification;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 
@@ -19,6 +20,7 @@ public class User {
     private ArrayList<String> storedTripsID;
     private ArrayList<Friend> storedFriends;
     private ArrayList<Friend> storedFavFriends;
+    private ArrayList<Notification> notifications;
     private String u_key;
 
 
@@ -33,6 +35,16 @@ public class User {
         this.storedTripsID = new ArrayList<>();
         this.storedFriends = new ArrayList<>();
         this.storedFavFriends = new ArrayList<>();
+        this.notifications = new ArrayList<>();
+    }
+
+
+    public ArrayList<Notification> getNotifications() {
+        return notifications;
+    }
+
+    public void setNotifications(ArrayList<Notification> notifications) {
+        this.notifications = notifications;
     }
 
     public ArrayList<Friend> getStoredFriends() {
@@ -91,7 +103,6 @@ public class User {
         this.email = email;
     }
 
-    @JsonIgnore
     public String getFullName(){
         return this.firstName + " " + this.lastName;
     }

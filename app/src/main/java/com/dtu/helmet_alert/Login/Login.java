@@ -178,6 +178,7 @@ public class Login extends AppCompatActivity  {
                                 showProgress(false);
                             }
                             else {
+
                                 startActivity(new Intent(getBaseContext(), MainActivity.class));
                             }
 
@@ -250,8 +251,9 @@ public class Login extends AppCompatActivity  {
                         Log.d("Firebase", "User found: " + user.getFirstName());
                         MyApplication.setUser(user);
 
-                        SharedPreferences prefs = getSharedPreferences("com.dtu.tournamate_v1", Context.MODE_PRIVATE);
+                        SharedPreferences prefs = getSharedPreferences("com.dtu.susie_bike_app", Context.MODE_PRIVATE);
                         prefs.edit().putString("uID",user.getU_ID()).apply();
+                        prefs.edit().putString("uName",user.getFullName()).apply();
                         prefs.edit().commit();
 
                     }

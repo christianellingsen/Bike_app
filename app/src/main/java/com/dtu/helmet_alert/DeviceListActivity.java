@@ -174,9 +174,6 @@ public class DeviceListActivity extends Activity {
             deviceList.add(device);
             mEmptyList.setVisibility(View.GONE);
 
-
-
-
             deviceAdapter.notifyDataSetChanged();
         }
     }

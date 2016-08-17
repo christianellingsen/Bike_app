@@ -10,7 +10,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.os.AsyncTask;
 import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.IBinder;
@@ -23,34 +22,17 @@ import android.widget.Toast;
 
 import com.firebase.client.Firebase;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 /**
  * Created by chris on 12-05-2016.
  */
-public class BluetoothService extends Service {
+public class OLD_BluetoothService extends Service {
 
     private BluetoothAdapter mBluetoothAdapter;
 
@@ -59,7 +41,7 @@ public class BluetoothService extends Service {
     List<BluetoothDevice> deviceList;
     private ServiceConnection onService = null;
     Map<String, Integer> devRssiValues;
-    private static final long SCAN_PERIOD = 50000; //5 seconds
+    private static final long SCAN_PERIOD = 100000; //10 seconds
     private Handler mHandler, timerHandler;
     private boolean mScanning;
 
@@ -68,16 +50,13 @@ public class BluetoothService extends Service {
     private static final int STATE_OFF = 10;
 
     private int mHelmetState, mBikeState = UART_PROFILE_DISCONNECTED;
-    //private UartService mUARTServiceHelmet, mUARTServiceBike = null;
-    private HelmetService mHelmetService;
+
+    private OLD_HelmetService mHelmetService = null;
+
     private BluetoothDevice mHelmetDevice, mBikeDevice = null;
-    private BluetoothAdapter mBtAdapter = null;
+    //private BluetoothAdapter mBtAdapter = null;
 
     Firebase ref = new Firebase(MyApplication.firebase_URL);
-
-    HttpClient httpClient = new DefaultHttpClient();
-    HttpPost httpPost = new HttpPost(MyApplication.TS_ADDRESS);
-
 
     @Override
     public void onCreate() {
@@ -100,10 +79,10 @@ public class BluetoothService extends Service {
         }
 
         // BT
-        mBtAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (mBtAdapter == null) {
-            Toast.makeText(this, "Bluetooth is not available", Toast.LENGTH_LONG).show();
-        }
+        //mBtAdapter = BluetoothAdapter.getDefaultAdapter();
+        //if (mBtAdapter == null) {
+        //    Toast.makeText(this, "Bluetooth is not available", Toast.LENGTH_LONG).show();
+        //}
 
         mScanning = false;
 
@@ -123,7 +102,7 @@ public class BluetoothService extends Service {
     //Helmet service connected/disconnected
     private ServiceConnection mHelmetServiceConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder rawBinder) {
-            mHelmetService = ((HelmetService.LocalBinder) rawBinder).getService();
+            mHelmetService = ((OLD_HelmetService.LocalBinder) rawBinder).getService();
             Log.d(TAG, "onServiceConnected mHelmetService= " + mHelmetService);
             if (!mHelmetService.initialize()) {
                 Log.e(TAG, "Unable to initialize Bluetooth");
@@ -146,7 +125,7 @@ public class BluetoothService extends Service {
 
             final Intent mIntent = intent;
             //*********************//
-            if (action.equals(HelmetService.ACTION_GATT_CONNECTED)) {
+            if (action.equals(OLD_HelmetService.ACTION_GATT_CONNECTED)) {
                 Log.d(TAG, "HELMET_CONNECT_MSG");
 
 
@@ -160,7 +139,7 @@ public class BluetoothService extends Service {
             }
 
             //*********************//
-            if (action.equals(HelmetService.ACTION_GATT_DISCONNECTED)) {
+            if (action.equals(OLD_HelmetService.ACTION_GATT_DISCONNECTED)) {
                 Log.d(TAG, "HELMET_DISCONNECT_MSG");
                 MyApplication.bikeRide.setWoreHelmetCorrect(false);
                 if(!MyApplication.helmetConnect && mHelmetDevice!=null) {
@@ -178,12 +157,12 @@ public class BluetoothService extends Service {
 
 
             //*********************//
-            if (action.equals(HelmetService.ACTION_GATT_SERVICES_DISCOVERED)) {
+            if (action.equals(OLD_HelmetService.ACTION_GATT_SERVICES_DISCOVERED)) {
                 mHelmetService.enableTXNotification();
             }
             //*********************//
 
-            if (action.equals(HelmetService.ACTION_DATA_AVAILABLE)) {
+            if (action.equals(OLD_HelmetService.ACTION_DATA_AVAILABLE)) {
 
                 //final byte[] txValue = intent.getByteArrayExtra(UartService.EXTRA_DATA);
                 //final byte [] valueByte = Arrays.copyOfRange(txValue, 1, txValue.length);
@@ -216,14 +195,14 @@ public class BluetoothService extends Service {
                 }
                 //Log.d(TAG, "New data logged");
                 if (!MyApplication.runUpload){
-                    new Thread(uploadToCloud).start();
+                    new Thread(readHelmetAccChar).start();
                     MyApplication.runUpload = true;
                 }
                  **/
 
             }
             //*********************//
-            if (action.equals(HelmetService.DEVICE_DOES_NOT_SUPPORT_UART)) {
+            if (action.equals(OLD_HelmetService.DEVICE_DOES_NOT_SUPPORT_UART)) {
                 mHelmetService.disconnect();
             }
 
@@ -234,7 +213,7 @@ public class BluetoothService extends Service {
 
 
     private void service_init() {
-        Intent bindIntentHelmet = new Intent(this, HelmetService.class);
+        Intent bindIntentHelmet = new Intent(this, OLD_HelmetService.class);
         bindService(bindIntentHelmet, mHelmetServiceConnection, Context.BIND_AUTO_CREATE);
 
         mHelmetService.initialize();
@@ -245,11 +224,11 @@ public class BluetoothService extends Service {
 
     private static IntentFilter makeGattUpdateIntentFilter() {
         final IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(HelmetService.ACTION_GATT_CONNECTED);
-        intentFilter.addAction(HelmetService.ACTION_GATT_DISCONNECTED);
-        intentFilter.addAction(HelmetService.ACTION_GATT_SERVICES_DISCOVERED);
-        intentFilter.addAction(HelmetService.ACTION_DATA_AVAILABLE);
-        intentFilter.addAction(HelmetService.DEVICE_DOES_NOT_SUPPORT_UART);
+        intentFilter.addAction(OLD_HelmetService.ACTION_GATT_CONNECTED);
+        intentFilter.addAction(OLD_HelmetService.ACTION_GATT_DISCONNECTED);
+        intentFilter.addAction(OLD_HelmetService.ACTION_GATT_SERVICES_DISCOVERED);
+        intentFilter.addAction(OLD_HelmetService.ACTION_DATA_AVAILABLE);
+        intentFilter.addAction(OLD_HelmetService.DEVICE_DOES_NOT_SUPPORT_UART);
         return intentFilter;
     }
 
@@ -263,10 +242,10 @@ public class BluetoothService extends Service {
             scanLeDevice(true);
         }
 
-        //new Thread(uploadToCloud).start();
+        //new Thread(readHelmetAccChar).start();
         //Log.d(TAG, "onStart called");
         //MyApplication.runUpload = true;
-        //uploadRunnable = threadPoolExecutor.submit(uploadToCloud);
+        //uploadRunnable = threadPoolExecutor.submit(readHelmetAccChar);
 
         return super.onStartCommand(intent, flags, startId);
     }
@@ -396,9 +375,6 @@ public class BluetoothService extends Service {
                     scanLeDevice(true);
                 }
 
-                // Save to ThingSpeak
-                uploadValueToTS();
-
                 // Notify if no helmet
                 if (!MyApplication.bikeRide.isWoreHelmetCorrect()){
                     NotificationCompat.Builder builder = new NotificationCompat.Builder(getBaseContext());
@@ -416,7 +392,7 @@ public class BluetoothService extends Service {
                 }
             }
             else {
-                //timerHandler.postDelayed(uploadToCloud, 15000);
+                //timerHandler.postDelayed(readHelmetAccChar, 15000);
             }
         }
     };
@@ -434,69 +410,6 @@ public class BluetoothService extends Service {
 
 
 
-    private void uploadValueToTS() {
-        final int batt = (int) getBatteryCapacity();
-        //final int v = value;
-        final double speed = MyApplication.bikeRide.getAverageSpeed();
-        final boolean helmetOn = MyApplication.bikeRide.isWoreHelmetCorrect();
-
-        new AsyncTask() {
-            @Override
-            protected Object doInBackground(Object... executeParametre) {
-                StringBuilder sb = new StringBuilder();
-                 sb.append("");
-                 sb.append(speed);
-                 String strI = sb.toString();
-
-
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("");
-                if (helmetOn){
-                    sb2.append(1);
-                }
-                else {
-                    sb2.append(0);
-                }
-                String strI2 = sb2.toString();
-
-                StringBuilder sb3 = new StringBuilder();
-                sb3.append("");
-                sb3.append(batt);
-                String strI3 = sb3.toString();
-
-                //Post Data
-                List<NameValuePair> nameValuePair = new ArrayList<NameValuePair>(2);
-                nameValuePair.add(new BasicNameValuePair("api_key", MyApplication.WRITE_API_KEY));
-                nameValuePair.add(new BasicNameValuePair("field1", strI));
-                nameValuePair.add(new BasicNameValuePair("field2", strI2));
-                nameValuePair.add(new BasicNameValuePair("field3", strI3));
-
-                //Encoding POST data
-                try {
-                    httpPost.setEntity(new UrlEncodedFormEntity(nameValuePair));
-                } catch (UnsupportedEncodingException e) {
-                    // log exception
-                    e.printStackTrace();
-                }
-
-                //making POST request.
-                try {
-                    HttpResponse response = httpClient.execute(httpPost);
-                    // write response to log
-                    Log.d("Http Post Response:", response.toString());
-                } catch (ClientProtocolException e) {
-                    // Log exception
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    // Log exception
-                    e.printStackTrace();
-                }
-                return 0;  // <5>
-            }
-
-        }.execute();
-
-    }
 }
 
 

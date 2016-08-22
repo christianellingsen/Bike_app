@@ -5,9 +5,6 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.dtu.helmet_alert.MyApplication;
-import com.dtu.helmet_alert.OLD_BluetoothService;
-import com.dtu.helmet_alert.biking.BikeRide;
-import com.dtu.helmet_alert.bluetooth.HelmetServiceBT;
 import com.firebase.client.Firebase;
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;

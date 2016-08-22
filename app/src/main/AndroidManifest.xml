@@ -51,7 +51,7 @@
         <service android:name=".biking.ActivityRecognizedService" />
         <service android:name=".OLD_BluetoothService" />
         <service android:name=".bluetooth.BluetoothService" android:enabled="true"/>
-        <service android:name=".bluetooth.HelmetServiceBT" android:enabled="true"/>
+        <service android:name=".bluetooth.DeviceServiceBT" android:enabled="true"/>
         <service android:name=".biking.MonitorBikeRide" android:enabled="true"/>
         <!--
              ATTENTION: This was auto-generated to add Google Play services to your project for

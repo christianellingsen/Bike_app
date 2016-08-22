@@ -34,8 +34,8 @@ import java.util.List;
  * communicates with {@code BluetoothLeService}, which in turn interacts with the
  * Bluetooth LE API.
  */
-public class HelmetServiceBT extends Service {
-    private final static String TAG = HelmetServiceBT.class.getSimpleName();
+public class DeviceServiceBT extends Service {
+    private final static String TAG = DeviceServiceBT.class.getSimpleName();
 
     public static final String EXTRAS_STATE = "STATE";
 

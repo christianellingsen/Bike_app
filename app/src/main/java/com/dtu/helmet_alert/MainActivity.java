@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity
         //username.setText(user.getDisplayName());
         //TODO store user on sign in or login, and get users name from MyApplication object.
         username.setText(MyApplication.userName);
-        fetchUser();
+        //fetchUser();
     }
 
     @Override
@@ -214,11 +214,11 @@ public class MainActivity extends AppCompatActivity
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     Log.d("MyApplication on start", "Found user! ");
                         User u = dataSnapshot.getValue(User.class);
-                        Log.d("MyApplication on start", "Found user! " + u.getFullName());
+//                        Log.d("MyApplication on start", "Found user! " + u.getFullName());
                             MyApplication.setUser(u);
                             Log.d("On MyApplication start", "Logged in as " + MyApplication.getUser().getFullName());
                             username.setText(u.getFullName());
-                            notificationListenInit();
+                            //notificationListenInit();
                 }
                 @Override
                 public void onCancelled(DatabaseError databaseError) {

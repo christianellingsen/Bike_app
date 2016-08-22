@@ -21,7 +21,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.dtu.helmet_alert.bluetooth.HelmetServiceBT;
+import com.dtu.helmet_alert.bluetooth.DeviceServiceBT;
 
 /**
  * Created by ce on 22-07-2016.
@@ -93,7 +93,7 @@ public class CalibrateHelmet extends Fragment{
                         startActivityForResult(newIntent, REQUEST_SELECT_DEVICE);
                     } else {
                         //Disconnect button pressed
-                        getActivity().stopService(new Intent(getActivity().getBaseContext(), HelmetServiceBT.class));
+                        getActivity().stopService(new Intent(getActivity().getBaseContext(), DeviceServiceBT.class));
                         helmetImage.setImageResource(R.drawable.helmet_side_bw);
                         arrow_cw.setVisibility(View.INVISIBLE);
                         arrow_ccw.setVisibility(View.INVISIBLE);
@@ -146,10 +146,10 @@ public class CalibrateHelmet extends Fragment{
 
                         Log.d(TAG,"Connecting to: " + mHelmetDevice.getName()+" with address: "+mHelmetDevice.getAddress());
 
-                        final Intent intent = new Intent(getContext(), HelmetServiceBT.class);
-                        intent.putExtra(HelmetServiceBT.EXTRAS_DEVICE_NAME, mHelmetDevice.getName());
-                        intent.putExtra(HelmetServiceBT.EXTRAS_DEVICE_ADDRESS, mHelmetDevice.getAddress());
-                        intent.putExtra(HelmetServiceBT.EXTRAS_STATE,MyApplication.STATE_CALIBRATE);
+                        final Intent intent = new Intent(getContext(), DeviceServiceBT.class);
+                        intent.putExtra(DeviceServiceBT.EXTRAS_DEVICE_NAME, mHelmetDevice.getName());
+                        intent.putExtra(DeviceServiceBT.EXTRAS_DEVICE_ADDRESS, mHelmetDevice.getAddress());
+                        intent.putExtra(DeviceServiceBT.EXTRAS_STATE,MyApplication.STATE_CALIBRATE);
                         getActivity().startService(intent);
 
                         //getActivity().startService(new Intent(getContext(), OLD_BluetoothService.class));
@@ -230,7 +230,7 @@ public class CalibrateHelmet extends Fragment{
 
     private static IntentFilter accDataUpdateIntentFilter() {
         final IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(HelmetServiceBT.NEW_ACC_DATA);
+        intentFilter.addAction(DeviceServiceBT.NEW_ACC_DATA);
         return intentFilter;
     }
 
@@ -238,10 +238,10 @@ public class CalibrateHelmet extends Fragment{
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
-            if (HelmetServiceBT.NEW_ACC_DATA.equals(action)) {
+            if (DeviceServiceBT.NEW_ACC_DATA.equals(action)) {
 
                 //update acc_x value
-                acc_x = intent.getDoubleExtra(HelmetServiceBT.ACC_X_DATA_VALUE,0);
+                acc_x = intent.getDoubleExtra(DeviceServiceBT.ACC_X_DATA_VALUE,0);
 
                 acc_x=acc_x*-1.0;
                 // update UI

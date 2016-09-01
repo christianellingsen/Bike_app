@@ -42,7 +42,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".bluetooth.DeviceControlActivity"/>
+        <activity android:name=".bluetooth.TEST_DeviceControlActivity"/>
 
 
         <service

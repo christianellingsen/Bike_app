@@ -83,7 +83,7 @@ public class PairDevices extends AppCompatActivity implements GoogleApiClient.Co
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+        setContentView(R.layout.pair_devices_settings);
 
         test_b = (Button) findViewById(R.id.test_b);
 

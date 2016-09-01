@@ -11,15 +11,13 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationManagerCompat;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
 import com.dtu.helmet_alert.MyApplication;
-import com.dtu.helmet_alert.OLD_BluetoothService;
 import com.dtu.helmet_alert.R;
 import com.dtu.helmet_alert.bluetooth.BluetoothService;
-import com.dtu.helmet_alert.bluetooth.HelmetServiceBT;
+import com.dtu.helmet_alert.bluetooth.DeviceServiceBT;
 import com.dtu.helmet_alert.friends.Friend;
 import com.dtu.helmet_alert.friends.Notification;
 import com.firebase.client.Firebase;
@@ -85,10 +83,10 @@ public class MonitorBikeRide extends Service {
         bikeRide.setBikeRide_ID(bikeRideRef.getKey());
         bikeRide.setUserID(MyApplication.getUser().getU_key());
 
-        final Intent intent = new Intent(getBaseContext(), HelmetServiceBT.class);
-        intent.putExtra(HelmetServiceBT.EXTRAS_DEVICE_NAME, MyApplication.HELMET_DEVICE_NAME);
-        intent.putExtra(HelmetServiceBT.EXTRAS_DEVICE_ADDRESS, MyApplication.HELMET_DEVICE_ADDRESS);
-        intent.putExtra(HelmetServiceBT.EXTRAS_STATE,MyApplication.STATE_BIKING);
+        final Intent intent = new Intent(getBaseContext(), DeviceServiceBT.class);
+        intent.putExtra(DeviceServiceBT.EXTRAS_DEVICE_NAME, MyApplication.HELMET_DEVICE_NAME);
+        intent.putExtra(DeviceServiceBT.EXTRAS_DEVICE_ADDRESS, MyApplication.HELMET_DEVICE_ADDRESS);
+        intent.putExtra(DeviceServiceBT.EXTRAS_STATE,MyApplication.STATE_BIKING);
         startService(intent);
 
         //uploadThread.start();
@@ -145,7 +143,7 @@ public class MonitorBikeRide extends Service {
 
     private static IntentFilter accDataUpdateIntentFilter() {
         final IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(HelmetServiceBT.NEW_ACC_DATA);
+        intentFilter.addAction(DeviceServiceBT.NEW_ACC_DATA);
         intentFilter.addAction(BluetoothService.ACTION_GATT_DISCONNECTED);
         return intentFilter;
     }
@@ -154,10 +152,10 @@ public class MonitorBikeRide extends Service {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
-            if (HelmetServiceBT.NEW_ACC_DATA.equals(action)) {
+            if (DeviceServiceBT.NEW_ACC_DATA.equals(action)) {
 
                 //update acc_z value
-                acc_z = intent.getDoubleExtra(HelmetServiceBT.ACC_Z_DATA_VALUE,0);
+                acc_z = intent.getDoubleExtra(DeviceServiceBT.ACC_Z_DATA_VALUE,0);
                 //uploadToFirebase(acc_z);
 
             }
@@ -206,7 +204,7 @@ public class MonitorBikeRide extends Service {
         unregisterReceiver(accDataUpdateReceiver);
         Log.d(TAG, "Thread stopped:" + uploadThread.isInterrupted());
         try {
-            stopService(new Intent(getBaseContext(), HelmetServiceBT.class));
+            stopService(new Intent(getBaseContext(), DeviceServiceBT.class));
             stopSelf();
 
         } catch (Exception ignore) {
@@ -236,6 +234,7 @@ public class MonitorBikeRide extends Service {
          builder2.setSmallIcon(R.mipmap.ic_launcher);
          builder2.setContentTitle(getString(R.string.app_name));
          builder2.setSound(alarmSound);
+        builder2.setVibrate(new long[] { 1000, 1000, 1000, 1000 });
          NotificationManagerCompat.from(this).notify(0, builder2.build());
 
     }

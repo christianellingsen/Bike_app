@@ -91,7 +91,7 @@ public class OLD_DebugUartBT extends AppCompatActivity implements View.OnClickLi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main_akt);
+        setContentView(R.layout.OLD_main_akt);
 
         // UI
         //upload_b = (Button) findViewById(R.id.button);

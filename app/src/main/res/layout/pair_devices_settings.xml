@@ -43,12 +43,6 @@
         android:layout_gravity="center_horizontal"
         android:text="Connect" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Start"
-        android:id="@+id/test_b"/>
-
     </LinearLayout>
 
     <LinearLayout
